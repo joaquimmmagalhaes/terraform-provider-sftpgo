@@ -16,6 +16,11 @@ func Get() *schema.Resource {
 		ReadContext:   get,
 		UpdateContext: update,
 		DeleteContext: delete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: importer,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"status": {
 				Type:     schema.TypeInt,

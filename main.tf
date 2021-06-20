@@ -28,3 +28,19 @@ resource "hashicups_admin" "test" {
 
   additional_info = "BOM DIAAAAAAAAAAAAAA"
 }
+
+resource "hashicups_admin" "test_2" {
+  username = "terraform5"
+  permissions = ["add_users", "edit_users"]
+  email = "aaa10@example.pt"
+  status = 1
+  # description = "somethunbg"
+  password = "bom dia"
+  filters {
+    allow_list = [
+      "10.0.0.0/0"
+    ]
+  }
+
+  additional_info = "BOM DIAAAAAAAAAAAAAA"
+}
