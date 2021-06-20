@@ -36,8 +36,8 @@ func Get() *schema.Resource {
 			"password": {
 				StateFunc: hashSum,
 				Sensitive: true,
-				Type:     schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
 			},
 			"email": {
 				Type:     schema.TypeString,
