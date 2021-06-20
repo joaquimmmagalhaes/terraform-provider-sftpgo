@@ -1,3 +1,4 @@
 .idea/
 vendor/
 terraform-provider-drakkan-sftpgo
+.terraform/

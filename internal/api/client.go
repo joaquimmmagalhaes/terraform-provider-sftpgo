@@ -24,7 +24,7 @@ func NewClient(ctx context.Context, host, username, password *string) (Client, e
 	}
 
 	data := []byte(fmt.Sprintf("%s:%s", *username, *password))
-	str := base64.StdEncoding.EncodeToString(data)
+	token := base64.StdEncoding.EncodeToString(data)
 
 	// get token
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v2/token", c.HostURL), nil)
@@ -32,8 +32,8 @@ func NewClient(ctx context.Context, host, username, password *string) (Client, e
 		return nil, err
 	}
 
-	req.Header.Set("Basic", str)
-	body, err := c.doRequest(ctx, req)
+	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", token))
+	body, _, err := c.doRequest(ctx, req)
 
 	// parse response body
 	ar := AuthResponse{}
@@ -46,22 +46,18 @@ func NewClient(ctx context.Context, host, username, password *string) (Client, e
 	return &c, nil
 }
 
-func (c *client) doRequest(ctx context.Context, req *http.Request) ([]byte, error) {
+func (c *client) doRequest(ctx context.Context, req *http.Request) ([]byte, *http.Response, error) {
+	if len(c.Token) > 0 {
+		req.Header.Set("Authorization", c.Token)
+	}
+
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
-	}
-
-	return body, err
+	return body, res, err
 }

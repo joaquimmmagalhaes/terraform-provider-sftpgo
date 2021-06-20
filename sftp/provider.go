@@ -1,12 +1,11 @@
-package provider
+package sftp
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
-	datasources "github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/data-sources"
-	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/resources"
+	adminResource "github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/resources/admin"
 )
 
 // Provider -
@@ -31,10 +30,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sftp_admin": resources.ResourceAdmin(),
-		},
-		DataSourcesMap: map[string]*schema.Resource{
-			"sftp_admin": datasources.DataSourceAdmin(),
+			"hashicups_admin": adminResource.Get(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -58,7 +54,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Unable to create STFPGo client",
-			Detail:   "Unable to authenticate user for authenticated STFPGo client",
+			Detail:   err.Error(),
 		})
 
 		return nil, diags
