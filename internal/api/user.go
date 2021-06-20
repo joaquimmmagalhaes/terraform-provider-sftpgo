@@ -15,9 +15,13 @@ func (c *client) GetUser(ctx context.Context, username string) (*models.User, er
 		return nil, err
 	}
 
-	body, err := c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 
 	order := models.User{}
@@ -40,9 +44,13 @@ func (c *client) CreateUser(ctx context.Context, admin models.User) (*models.Use
 		return nil, err
 	}
 
-	body, err := c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 
 	order := models.User{}
@@ -65,7 +73,14 @@ func (c *client) UpdateUser(ctx context.Context, username string, admin models.U
 		return err
 	}
 
-	_, err = c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+	}
 
 	return err
 }
@@ -76,7 +91,14 @@ func (c *client) DeleteUser(ctx context.Context, username string) error {
 		return err
 	}
 
-	_, err = c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+	}
 
 	return err
 }

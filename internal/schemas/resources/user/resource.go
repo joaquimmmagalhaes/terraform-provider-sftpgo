@@ -1,187 +1,300 @@
 package user
 
 import (
-	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
-	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
-	"strconv"
-	"time"
 )
 
-func ResourceUser() *schema.Resource {
+func Get() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceUserCreate,
-		ReadContext:   resourceUserGet,
-		UpdateContext: resourceUserUpdate,
-		DeleteContext: resourceUserDelete,
+		CreateContext: create,
+		ReadContext:   get,
+		UpdateContext: update,
+		DeleteContext: delete,
 		Schema: map[string]*schema.Schema{
-			"last_updated": {
-				Type:     schema.TypeString,
+			"status": {
+				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default:  1,
 			},
-			"item": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
+			"username": {
+				Type:     schema.TypeString,
 				Required: true,
+			},
+			"expiration_date": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"password": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"public_keys": {
+				Type:      schema.TypeList,
+				Optional:  true,
+				Sensitive: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"home_dir": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"permissions": {
+				Type: schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeList,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				Optional: true,
+			},
+			"uid": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"gid": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"max_sessions": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"quota_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"quota_files": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"virtual_folders": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"status": {
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"mapped_path": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"used_quota_size": {
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true,
 						},
-						"username": {
-							Type:     schema.TypeString,
-							Required: true,
+						"used_quota_files": {
+							Type:     schema.TypeInt,
+							Optional: true,
 						},
-						"description": {
-							Type:     schema.TypeString,
-							Required: true,
+						"last_quota_update": {
+							Type:     schema.TypeInt,
+							Optional: true,
 						},
-						"password": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"email": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"permissions": {
+						"users": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
+							Elem:     schema.TypeList,
 						},
-						"filters": {
-							Type: schema.TypeList,
+						"virtual_path": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"quota_size": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"quota_files": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"used_quota_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"used_quota_files": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"last_quota_update": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"upload_bandwidth": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"download_bandwidth": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"last_login": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"filters": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"allowed_ip": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"denied_ip": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"denied_login_methods": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"file_extensions": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"allow_list": {
+									"path": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"allowed_extensions": {
 										Type:     schema.TypeList,
-										Required: true,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+									"denied_extensions": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
 									},
 								},
 							},
 						},
-						"additional_info": {
-							Type: schema.TypeString,
+					},
+				},
+			},
+			"filesystem": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"provider": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							// ExactlyOneOf: []string{"s3config", "gcsconfig"},
+						},
+						"s3config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"bucket": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"key_prefix": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"region": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"access_key": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"access_secret": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"endpoint": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"storage_class": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"upload_part_size": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+									"upload_concurrency": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+								},
+							},
+						},
+						"gcsconfig": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"bucket": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"key_prefix": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"credentials": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"automatic_credentials": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+									"storage_class": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+								},
+							},
 						},
 					},
 				},
 			},
 		},
 	}
-}
-
-func resourceUserGet(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(api.Client)
-
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	adminID := strconv.Itoa(d.Get("id").(int))
-
-	admin, err := c.GetUser(ctx, adminID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("item", flattenUser(admin)); err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(adminID)
-
-	return diags
-}
-
-func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(api.Client)
-
-	item := d.Get("item").(map[string]interface{})
-
-	user, err := c.CreateUser(ctx, convertFromMapToUserStruct(item))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(strconv.Itoa(int(user.ID)))
-
-	return resourceUserGet(ctx, d, m)
-}
-
-func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(api.Client)
-
-	adminID := d.Id()
-
-	if d.HasChange("item") {
-		item := d.Get("item").(map[string]interface{})
-
-		err := c.UpdateUser(ctx, adminID, convertFromMapToUserStruct(item))
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		d.Set("last_updated", time.Now().Format(time.RFC850))
-	}
-
-	return resourceUserGet(ctx, d, m)
-}
-
-func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(api.Client)
-
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
-
-	adminID := d.Id()
-
-	err := c.DeleteUser(ctx, adminID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId("")
-
-	return diags
-}
-
-func convertFromMapToUserStruct(item map[string]interface{}) models.User {
-	admin := models.User{
-		ID:                item["id"].(int64),
-		Status:            item["status"].(int),
-		Username:          item["username"].(string),
-		ExpirationDate:    item["expiration_date"].(int64),
-		Password:          item["password"].(string),
-		PublicKeys:        item["public_keys"].([]string),
-		HomeDir:           item["home_dir"].(string),
-		VirtualFolders:    nil,
-		UID:               item["uid"].(int),
-		GID:               item["gid"].(int),
-		MaxSessions:       item["max_sessions"].(int),
-		QuotaSize:         item["quota_size"].(int64),
-		QuotaFiles:        item["quota_files"].(int),
-		Permissions:       nil,
-		UsedQuotaSize:     item["used_quota_size"].(int64),
-		UsedQuotaFiles:    item["used_quota_files"].(int),
-		LastQuotaUpdate:   item["last_quota_update"].(int64),
-		UploadBandwidth:   item["upload_bandwidth"].(int64),
-		DownloadBandwidth: item["download_bandwidth"].(int64),
-		LastLogin:         item["last_login"].(int64),
-		Filters:           models.UserFilters{},
-		FsConfig:          models.Filesystem{},
-	}
-
-	return admin
-}
-
-func flattenUser(admin *models.User) []interface{} {
-	c := make(map[string]interface{})
-
-	return []interface{}{c}
 }

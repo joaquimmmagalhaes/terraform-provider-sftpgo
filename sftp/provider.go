@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
 	adminResource "github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/resources/admin"
+	userResource "github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/resources/user"
 )
 
 // Provider -
@@ -31,6 +32,7 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"hashicups_admin": adminResource.Get(),
+			"hashicups_user":  userResource.Get(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

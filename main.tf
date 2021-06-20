@@ -29,18 +29,20 @@ resource "hashicups_admin" "test" {
   additional_info = "BOM DIAAAAAAAAAAAAAA"
 }
 
-resource "hashicups_admin" "test_2" {
-  username = "terraform5"
-  permissions = ["add_users", "edit_users"]
-  email = "aaa10@example.pt"
-  status = 1
-  # description = "somethunbg"
-  password = "bom dia"
-  filters {
-    allow_list = [
-      "10.0.0.0/0"
+resource "hashicups_user" "test" {
+  username = "terraform13"
+  home_dir = "/mp"
+/*  permissions = {
+    "/" = [
+      "*"
     ]
+  }*/
+  password = "asdsa"
+  filesystem {
+    provider = 0
+    gcsconfig {
+      bucket = "sword-sftp-test"
+      automatic_credentials = 1
+    }
   }
-
-  additional_info = "BOM DIAAAAAAAAAAAAAA"
 }

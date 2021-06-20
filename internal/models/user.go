@@ -1,10 +1,10 @@
 package models
 
 type User struct {
-	ID                int64               `json:"id"`
+	ID                int                 `json:"id"`
 	Status            int                 `json:"status"`
 	Username          string              `json:"username"`
-	ExpirationDate    int64               `json:"expiration_date"`
+	ExpirationDate    int                 `json:"expiration_date"`
 	Password          string              `json:"password,omitempty"`
 	PublicKeys        []string            `json:"public_keys,omitempty"`
 	HomeDir           string              `json:"home_dir"`
@@ -12,17 +12,18 @@ type User struct {
 	UID               int                 `json:"uid"`
 	GID               int                 `json:"gid"`
 	MaxSessions       int                 `json:"max_sessions"`
-	QuotaSize         int64               `json:"quota_size"`
+	QuotaSize         int                 `json:"quota_size"`
 	QuotaFiles        int                 `json:"quota_files"`
 	Permissions       map[string][]string `json:"permissions"`
-	UsedQuotaSize     int64               `json:"used_quota_size"`
+	UsedQuotaSize     int                 `json:"used_quota_size"`
 	UsedQuotaFiles    int                 `json:"used_quota_files"`
-	LastQuotaUpdate   int64               `json:"last_quota_update"`
-	UploadBandwidth   int64               `json:"upload_bandwidth"`
-	DownloadBandwidth int64               `json:"download_bandwidth"`
-	LastLogin         int64               `json:"last_login"`
+	LastQuotaUpdate   int                 `json:"last_quota_update"`
+	UploadBandwidth   int                 `json:"upload_bandwidth"`
+	DownloadBandwidth int                 `json:"download_bandwidth"`
+	LastLogin         int                 `json:"last_login"`
 	Filters           UserFilters         `json:"filters"`
 	FsConfig          Filesystem          `json:"filesystem"`
+	AdditionalInfo    string              `json:"additional_info,omitempty"`
 }
 
 type ExtensionsFilter struct {
@@ -46,7 +47,7 @@ type S3FsConfig struct {
 	AccessSecret      string `json:"access_secret,omitempty"`
 	Endpoint          string `json:"endpoint,omitempty"`
 	StorageClass      string `json:"storage_class,omitempty"`
-	UploadPartSize    int64  `json:"upload_part_size,omitempty"`
+	UploadPartSize    int    `json:"upload_part_size,omitempty"`
 	UploadConcurrency int    `json:"upload_concurrency,omitempty"`
 }
 
@@ -64,7 +65,19 @@ type Filesystem struct {
 	GCSConfig GCSFsConfig `json:"gcsconfig,omitempty"`
 }
 
+type BaseVirtualFolder struct {
+	ID              int      `json:"id"`
+	Name            string   `json:"name"`
+	MappedPath      string   `json:"mapped_path,omitempty"`
+	UsedQuotaSize   int      `json:"used_quota_size"`
+	UsedQuotaFiles  int      `json:"used_quota_files"`
+	LastQuotaUpdate int      `json:"last_quota_update"`
+	Users           []string `json:"users,omitempty"`
+}
+
 type VirtualFolder struct {
+	BaseVirtualFolder
 	VirtualPath string `json:"virtual_path"`
-	MappedPath  string `json:"mapped_path"`
+	QuotaSize   int    `json:"quota_size"`
+	QuotaFiles  int    `json:"quota_files"`
 }
