@@ -1,4 +1,4 @@
-package resources
+package user
 
 import (
 	"context"
@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-func ResourceAdmin() *schema.Resource {
+func ResourceUser() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceAdminCreate,
-		ReadContext:   resourceAdminGet,
-		UpdateContext: resourceAdminUpdate,
-		DeleteContext: resourceAdminDelete,
+		CreateContext: resourceUserCreate,
+		ReadContext:   resourceUserGet,
+		UpdateContext: resourceUserUpdate,
+		DeleteContext: resourceUserDelete,
 		Schema: map[string]*schema.Schema{
 			"last_updated": {
 				Type:     schema.TypeString,
@@ -77,7 +77,7 @@ func ResourceAdmin() *schema.Resource {
 	}
 }
 
-func resourceAdminGet(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUserGet(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(api.Client)
 
 	// Warning or errors can be collected in a slice type
@@ -85,12 +85,12 @@ func resourceAdminGet(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	adminID := strconv.Itoa(d.Get("id").(int))
 
-	admin, err := c.GetAdmin(ctx, adminID)
+	admin, err := c.GetUser(ctx, adminID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("item", flattenAdmin(admin)); err != nil {
+	if err := d.Set("item", flattenUser(admin)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -99,22 +99,22 @@ func resourceAdminGet(ctx context.Context, d *schema.ResourceData, m interface{}
 	return diags
 }
 
-func resourceAdminCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(api.Client)
 
 	item := d.Get("item").(map[string]interface{})
 
-	admin, err := c.CreateAdmin(ctx, convertFromMapToAdminStruct(item))
+	user, err := c.CreateUser(ctx, convertFromMapToUserStruct(item))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(admin.ID))
+	d.SetId(strconv.Itoa(int(user.ID)))
 
-	return resourceAdminGet(ctx, d, m)
+	return resourceUserGet(ctx, d, m)
 }
 
-func resourceAdminUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(api.Client)
 
 	adminID := d.Id()
@@ -122,7 +122,7 @@ func resourceAdminUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	if d.HasChange("item") {
 		item := d.Get("item").(map[string]interface{})
 
-		err := c.UpdateAdmin(ctx, adminID, convertFromMapToAdminStruct(item))
+		err := c.UpdateUser(ctx, adminID, convertFromMapToUserStruct(item))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -130,10 +130,10 @@ func resourceAdminUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
 
-	return resourceAdminGet(ctx, d, m)
+	return resourceUserGet(ctx, d, m)
 }
 
-func resourceAdminDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(api.Client)
 
 	// Warning or errors can be collected in a slice type
@@ -141,7 +141,7 @@ func resourceAdminDelete(ctx context.Context, d *schema.ResourceData, m interfac
 
 	adminID := d.Id()
 
-	err := c.DeleteAdmin(ctx, adminID)
+	err := c.DeleteUser(ctx, adminID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -151,47 +151,37 @@ func resourceAdminDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
-func convertFromMapToAdminStruct(item map[string]interface{}) models.Admin {
-	var admin models.Admin
-
-	admin.ID = item["id"].(int)
-	admin.Status = item["status"].(int)
-	admin.Username = item["username"].(string)
-	admin.Description = item["description"].(string)
-	admin.Password = item["password"].(string)
-	admin.Email = item["email"].(string)
-	admin.Permissions = item["permissions"].([]string)
-	admin.AdditionalInfo = item["additional_info"].(string)
-
-	// Map filters
-	filters := item["filters"].(map[string]interface{})
-	admin.Filters = models.AdminFilters{
-		AllowList: filters["allow_list"].([]string),
+func convertFromMapToUserStruct(item map[string]interface{}) models.User {
+	admin := models.User{
+		ID:                item["id"].(int64),
+		Status:            item["status"].(int),
+		Username:          item["username"].(string),
+		ExpirationDate:    item["expiration_date"].(int64),
+		Password:          item["password"].(string),
+		PublicKeys:        item["public_keys"].([]string),
+		HomeDir:           item["home_dir"].(string),
+		VirtualFolders:    nil,
+		UID:               item["uid"].(int),
+		GID:               item["gid"].(int),
+		MaxSessions:       item["max_sessions"].(int),
+		QuotaSize:         item["quota_size"].(int64),
+		QuotaFiles:        item["quota_files"].(int),
+		Permissions:       nil,
+		UsedQuotaSize:     item["used_quota_size"].(int64),
+		UsedQuotaFiles:    item["used_quota_files"].(int),
+		LastQuotaUpdate:   item["last_quota_update"].(int64),
+		UploadBandwidth:   item["upload_bandwidth"].(int64),
+		DownloadBandwidth: item["download_bandwidth"].(int64),
+		LastLogin:         item["last_login"].(int64),
+		Filters:           models.UserFilters{},
+		FsConfig:          models.Filesystem{},
 	}
 
 	return admin
 }
 
-func flattenAdmin(admin *models.Admin) []interface{} {
+func flattenUser(admin *models.User) []interface{} {
 	c := make(map[string]interface{})
-
-	c["id"] = admin.ID
-	c["status"] = admin.Status
-	c["username"] = admin.Username
-	c["description"] = admin.Description
-	c["password"] = admin.Password
-	c["email"] = admin.Email
-	c["permissions"] = admin.Permissions
-	c["filters"] = flattenFilters(admin.Filters)
-	c["additional_info"] = admin.AdditionalInfo
-
-	return []interface{}{c}
-}
-
-func flattenFilters(filters models.AdminFilters) []interface{} {
-	c := make(map[string]interface{})
-
-	c["allow_list"] = filters.AllowList
 
 	return []interface{}{c}
 }
