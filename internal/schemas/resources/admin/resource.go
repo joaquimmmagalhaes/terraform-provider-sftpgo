@@ -27,6 +27,7 @@ func Get() *schema.Resource {
 			"username": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
