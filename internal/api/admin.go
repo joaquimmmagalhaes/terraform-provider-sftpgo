@@ -15,9 +15,13 @@ func (c *client) GetAdmin(ctx context.Context, username string) (*models.Admin, 
 		return nil, err
 	}
 
-	body, err := c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 
 	order := models.Admin{}
@@ -40,9 +44,13 @@ func (c *client) CreateAdmin(ctx context.Context, admin models.Admin) (*models.A
 		return nil, err
 	}
 
-	body, err := c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 
 	order := models.Admin{}
@@ -65,7 +73,7 @@ func (c *client) UpdateAdmin(ctx context.Context, username string, admin models.
 		return err
 	}
 
-	_, err = c.doRequest(ctx, req)
+	_, _, err = c.doRequest(ctx, req)
 
 	return err
 }
@@ -76,7 +84,7 @@ func (c *client) DeleteAdmin(ctx context.Context, username string) error {
 		return err
 	}
 
-	_, err = c.doRequest(ctx, req)
+	_, _, err = c.doRequest(ctx, req)
 
 	return err
 }
