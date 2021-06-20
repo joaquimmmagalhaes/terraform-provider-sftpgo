@@ -16,10 +16,6 @@ func Get() *schema.Resource {
 		UpdateContext: update,
 		DeleteContext: delete,
 		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"status": {
 				Type:     schema.TypeInt,
 				Required: true,
