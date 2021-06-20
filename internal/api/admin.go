@@ -73,7 +73,14 @@ func (c *client) UpdateAdmin(ctx context.Context, username string, admin models.
 		return err
 	}
 
-	_, _, err = c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+	}
 
 	return err
 }
@@ -84,7 +91,14 @@ func (c *client) DeleteAdmin(ctx context.Context, username string) error {
 		return err
 	}
 
-	_, _, err = c.doRequest(ctx, req)
+	body, res, err := c.doRequest(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+	}
 
 	return err
 }

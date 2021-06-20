@@ -14,15 +14,15 @@ provider "hashicups" {
 }
 
 resource "hashicups_admin" "test" {
-  username = "terraform12"
-  permissions = ["*"]
+  username = "terraform13"
+  permissions = ["add_users", "edit_users"]
   email = "aaa10@example.pt"
   status = 1
   # description = "somethunbg"
   password = "bom dia"
   filters {
     allow_list = [
-      "TEST"
+      "10.0.0.0/0"
     ]
   }
 

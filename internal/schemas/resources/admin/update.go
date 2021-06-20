@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
-	"time"
 )
 
 func update(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -13,13 +12,17 @@ func update(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Dia
 
 	adminID := d.Id()
 
-	if d.HasChanges("permissions") {
+	if d.HasChanges("status") ||
+		d.HasChanges("description") ||
+		d.HasChanges("password") ||
+		d.HasChanges("email") ||
+		d.HasChanges("permissions") ||
+		d.HasChanges("filters") ||
+		d.HasChanges("additional_info") {
 		err := c.UpdateAdmin(ctx, adminID, convertFromMapToAdminStruct(d))
 		if err != nil {
 			return diag.FromErr(err)
 		}
-
-		d.Set("last_updated", time.Now().Format(time.RFC850))
 	}
 
 	return get(ctx, d, m)

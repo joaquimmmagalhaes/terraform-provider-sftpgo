@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
+	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
 )
 
 func Get() *schema.Resource {
@@ -48,7 +49,8 @@ func Get() *schema.Resource {
 			},
 			"filters": {
 				Optional: true,
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allow_list": {
@@ -101,6 +103,10 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
+	if err := d.Set("filters", flattenFilters(admin.Filters)); err != nil {
+		return diag.FromErr(err)
+	}
+
 	if err := d.Set("additional_info", admin.AdditionalInfo); err != nil {
 		return diag.FromErr(err)
 	}
@@ -110,4 +116,11 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 
 func hashSum(contents interface{}) string {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(contents.(string))))
+}
+
+func flattenFilters(filters models.AdminFilters) []interface{} {
+	transformed := make(map[string]interface{})
+	transformed["allow_list"] = filters.AllowList
+
+	return []interface{}{transformed}
 }
