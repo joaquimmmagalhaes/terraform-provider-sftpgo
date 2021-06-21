@@ -1,8 +1,8 @@
 package user
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/helpers"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
 )
 
@@ -13,7 +13,7 @@ func convertToStruct(d *schema.ResourceData) models.User {
 	user.Username = d.Get("username").(string)
 	user.ExpirationDate = d.Get("expiration_date").(int)
 	user.Password = d.Get("password").(string)
-	user.PublicKeys = convertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
+	user.PublicKeys = helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
 	user.HomeDir = d.Get("home_dir").(string)
 	user.VirtualFolders = flattenVirtualFolders(d.Get("virtual_folders"))
 	user.UID = d.Get("uid").(int)
@@ -32,17 +32,6 @@ func convertToStruct(d *schema.ResourceData) models.User {
 	user.FsConfig = flattenFileSystem(d.Get("filesystem"))
 
 	return user
-}
-
-func convertFromInterfaceSliceToStringSlice(val interface{}) []string {
-	slice := val.([]interface{})
-	result := make([]string, len(slice))
-
-	for i, v := range slice {
-		result[i] = fmt.Sprint(v)
-	}
-
-	return result
 }
 
 func flattenVirtualFolders(data interface{}) []models.VirtualFolder {
@@ -74,7 +63,7 @@ func flattenVirtualFolders(data interface{}) []models.VirtualFolder {
 		}
 
 		if v, ok := folder["users"]; ok {
-			entry.Users = convertFromInterfaceSliceToStringSlice(v)
+			entry.Users = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 		}
 
 		if v, ok := folder["virtual_path"]; ok {
@@ -103,7 +92,7 @@ func flattenPermissions(data interface{}) map[string][]string {
 		permissions := permissions[0].(map[string]interface{})
 
 		if v, ok := permissions["global"]; ok {
-			result["/"] = convertFromInterfaceSliceToStringSlice(v.([]interface{}))
+			result["/"] = helpers.ConvertFromInterfaceSliceToStringSlice(v.([]interface{}))
 		}
 
 		if subDirs, ok := permissions["sub_dirs"]; ok {
@@ -116,7 +105,7 @@ func flattenPermissions(data interface{}) map[string][]string {
 
 					for _, v := range subDirs {
 						subDir := v.(map[string]interface{})
-						result[subDir["folder"].(string)] = convertFromInterfaceSliceToStringSlice(subDir["permission"].([]interface{}))
+						result[subDir["folder"].(string)] = helpers.ConvertFromInterfaceSliceToStringSlice(subDir["permission"].([]interface{}))
 					}
 				}
 			}

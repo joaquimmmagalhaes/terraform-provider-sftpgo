@@ -1,8 +1,8 @@
 package admin
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/helpers"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
 )
 
@@ -28,19 +28,9 @@ func convertFromMapToAdminStruct(d *schema.ResourceData) models.Admin {
 		admin.Filters = models.AdminFilters{}
 
 		if v, ok := filters["allow_list"]; ok {
-			admin.Filters.AllowList = convertFromInterfaceSliceToStringSlice(v.([]interface{}))
+			admin.Filters.AllowList = helpers.ConvertFromInterfaceSliceToStringSlice(v.([]interface{}))
 		}
 	}
 
 	return admin
-}
-
-func convertFromInterfaceSliceToStringSlice(t []interface{}) []string {
-	s := make([]string, len(t))
-
-	for i, v := range t {
-		s[i] = fmt.Sprint(v)
-	}
-
-	return s
 }

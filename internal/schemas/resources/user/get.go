@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
+	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/helpers"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
 )
 
@@ -126,11 +127,11 @@ func getPermissions(permissions map[string][]string) []interface{} {
 
 	for k, v := range permissions {
 		if k == "/" {
-			result["global"] = convertStringSliceToInterfaceSlice(v)
+			result["global"] = helpers.ConvertStringSliceToInterfaceSlice(v)
 		} else {
 			subDirs = append(subDirs, map[string]interface{}{
-				"folder": k,
-				"permission": convertStringSliceToInterfaceSlice(v),
+				"folder":     k,
+				"permission": helpers.ConvertStringSliceToInterfaceSlice(v),
 			})
 		}
 	}
@@ -138,13 +139,4 @@ func getPermissions(permissions map[string][]string) []interface{} {
 	result["sub_dirs"] = []interface{}{subDirs}
 
 	return []interface{}{result}
-}
-
-func convertStringSliceToInterfaceSlice(t []string) []interface{} {
-	s := make([]interface{}, len(t))
-	for i, v := range t {
-		s[i] = v
-	}
-
-	return s
 }
