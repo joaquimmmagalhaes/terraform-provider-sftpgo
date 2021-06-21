@@ -12,6 +12,10 @@ func Get() *schema.Resource {
 		UpdateContext: update,
 		DeleteContext: delete,
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -22,7 +26,7 @@ func Get() *schema.Resource {
 				Required: true,
 			},
 			"expiration_date": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Optional: true,
 			},
 			"password": {
@@ -94,7 +98,7 @@ func Get() *schema.Resource {
 				Default:  0,
 			},
 			"quota_size": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Optional: true,
 				Default:  0,
 			},
@@ -119,18 +123,6 @@ func Get() *schema.Resource {
 						},
 						"mapped_path": {
 							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"used_quota_size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"used_quota_files": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"last_quota_update": {
-							Type:     schema.TypeInt,
 							Optional: true,
 						},
 						"users": {
@@ -210,7 +202,14 @@ func Get() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
-						"file_extensions": {
+						"denied_protocols": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"file_patterns": {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,

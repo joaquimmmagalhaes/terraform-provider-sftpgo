@@ -11,25 +11,21 @@ func convertToStruct(d *schema.ResourceData) models.User {
 
 	user.Status = d.Get("status").(int)
 	user.Username = d.Get("username").(string)
-	user.ExpirationDate = d.Get("expiration_date").(int)
+	user.ExpirationDate = d.Get("expiration_date").(float64)
 	user.Password = d.Get("password").(string)
 	user.PublicKeys = helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
 	user.HomeDir = d.Get("home_dir").(string)
 	user.VirtualFolders = flattenVirtualFolders(d.Get("virtual_folders"))
-	user.UID = d.Get("uid").(int)
-	user.GID = d.Get("gid").(int)
+	user.Uid = d.Get("uid").(int)
+	user.Gid = d.Get("gid").(int)
 	user.MaxSessions = d.Get("max_sessions").(int)
-	user.QuotaSize = d.Get("quota_size").(int)
+	user.QuotaSize = d.Get("quota_size").(float64)
 	user.QuotaFiles = d.Get("quota_files").(int)
 	user.Permissions = flattenPermissions(d.Get("permissions"))
-	user.UsedQuotaSize = d.Get("used_quota_size").(int)
-	user.UsedQuotaFiles = d.Get("used_quota_files").(int)
-	user.LastQuotaUpdate = d.Get("last_quota_update").(int)
 	user.UploadBandwidth = d.Get("upload_bandwidth").(int)
 	user.DownloadBandwidth = d.Get("download_bandwidth").(int)
-	user.LastLogin = d.Get("last_login").(int)
 	user.Filters = flattenFilters(d.Get("filters"))
-	user.FsConfig = flattenFileSystem(d.Get("filesystem"))
+	user.Filesystem = flattenFileSystem(d.Get("filesystem"))
 
 	return user
 }
@@ -48,18 +44,6 @@ func flattenVirtualFolders(data interface{}) []models.VirtualFolder {
 
 		if v, ok := folder["mapped_path"]; ok {
 			entry.MappedPath = v.(string)
-		}
-
-		if v, ok := folder["used_quota_size"]; ok {
-			entry.UsedQuotaSize = v.(int)
-		}
-
-		if v, ok := folder["used_quota_files"]; ok {
-			entry.UsedQuotaFiles = v.(int)
-		}
-
-		if v, ok := folder["last_quota_update"]; ok {
-			entry.LastQuotaUpdate = v.(int)
 		}
 
 		if v, ok := folder["users"]; ok {
@@ -115,19 +99,19 @@ func flattenPermissions(data interface{}) map[string][]string {
 	return result
 }
 
-func flattenFilters(data interface{}) models.UserFilters {
-	var result models.UserFilters
+func flattenFilters(data interface{}) models.Filters {
+	var result models.Filters
 	items := data.([]interface{})
 
 	if len(items) > 0 {
 		items := items[0].(map[string]interface{})
 
 		if v, ok := items["allowed_ip"]; ok {
-			result.AllowedIP = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+			result.AllowedIp = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 		}
 
 		if v, ok := items["denied_ip"]; ok {
-			result.DeniedIP = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+			result.DeniedIp = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 		}
 
 		if v, ok := items["denied_login_methods"]; ok {
@@ -139,18 +123,18 @@ func flattenFilters(data interface{}) models.UserFilters {
 
 			if len(fileExtensions) > 0 {
 				fileExtensions := fileExtensions[0].(map[string]interface{})
-				result.FileExtensions = make([]models.ExtensionsFilter, len(fileExtensions))
+				result.FilePatterns = make([]models.FilePatterns, len(fileExtensions))
 
 				if v, ok = fileExtensions["path"]; ok {
-					result.FileExtensions[0].Path = v.(string)
+					result.FilePatterns[0].Path = v.(string)
 				}
 
 				if v, ok = fileExtensions["allowed_extensions"]; ok {
-					result.FileExtensions[0].AllowedExtensions = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+					result.FilePatterns[0].AllowedPatterns = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 				}
 
 				if v, ok = fileExtensions["denied_extensions"]; ok {
-					result.FileExtensions[0].DeniedExtensions = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+					result.FilePatterns[0].DeniedPatterns = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 				}
 			}
 		}
@@ -215,13 +199,14 @@ func flattenFileSystem(data interface{}) models.Filesystem {
 
 			if len(gcsconfig) > 0 {
 				gcsconfig := gcsconfig[0].(map[string]interface{})
+				var config models.Gcsconfig
 
 				if v, ok = gcsconfig["bucket"]; ok {
-					result.GCSConfig.Bucket = v.(string)
+					config.Bucket = v.(string)
 				}
 
 				if v, ok = gcsconfig["key_prefix"]; ok {
-					result.GCSConfig.KeyPrefix = v.(string)
+					config.KeyPrefix = v.(string)
 				}
 
 				// TODO FIX
@@ -230,15 +215,16 @@ func flattenFileSystem(data interface{}) models.Filesystem {
 				// } else {
 				// 	result.GCSConfig.Credentials = nil
 				// }
-				result.GCSConfig.Credentials = nil
 
 				if v, ok = gcsconfig["automatic_credentials"]; ok {
-					result.GCSConfig.AutomaticCredentials = v.(int)
+					config.AutomaticCredentials = v.(int)
 				}
 
 				if v, ok = gcsconfig["storage_class"]; ok {
-					result.GCSConfig.StorageClass = v.(string)
+					config.StorageClass = v.(string)
 				}
+
+				result.Gcsconfig = &config
 			}
 		}
 	}
