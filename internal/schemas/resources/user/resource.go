@@ -232,46 +232,6 @@ func Get() *schema.Resource {
 								},
 							},
 						},
-						"max_upload_file_size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"tls_username": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"hooks": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"external_auth_disabled": {
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-									"pre_login_disabled": {
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-									"check_password_disabled": {
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-								},
-							},
-						},
-						"disable_fs_checks": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"web_client": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
 					},
 				},
 			},
