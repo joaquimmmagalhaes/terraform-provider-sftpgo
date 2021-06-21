@@ -13,7 +13,12 @@ func convertToStruct(d *schema.ResourceData) models.User {
 	user.Username = d.Get("username").(string)
 	user.Description = d.Get("description").(string)
 	user.ExpirationDate = d.Get("expiration_date").(float64)
-	user.PublicKeys = helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
+
+	publicKeys := helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
+	if len(publicKeys) > 0 {
+		user.PublicKeys = publicKeys
+	}
+
 	user.HomeDir = d.Get("home_dir").(string)
 	user.VirtualFolders = flattenVirtualFolders(d.Get("virtual_folders"))
 	user.Uid = d.Get("uid").(int)

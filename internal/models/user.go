@@ -6,8 +6,8 @@ type User struct {
 	Username          string              `json:"username"`
 	Description       string              `json:"description"`
 	ExpirationDate    float64             `json:"expiration_date"`
-	Password          string              `json:"password"`
-	PublicKeys        []string            `json:"public_keys"`
+	Password          string              `json:"password,omitempty"`
+	PublicKeys        []string            `json:"public_keys,omitempty"`
 	HomeDir           string              `json:"home_dir"`
 	Permissions       map[string][]string `json:"permissions"`
 	Uid               int                 `json:"uid"`
