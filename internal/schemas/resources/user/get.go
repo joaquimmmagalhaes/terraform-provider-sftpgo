@@ -74,7 +74,6 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
-	// TODO Improve this to prevent invalid sort order
 	if err := d.Set("permissions", getPermissions(user.Permissions)); err != nil {
 		return diag.FromErr(err)
 	}
@@ -123,6 +122,7 @@ func getVirtualFolders(virtualFolders []models.VirtualFolder) []interface{} {
 	return result
 }
 
+// TODO Improve and add sort by folder to prevent changes due to sort change.
 func getPermissions(permissions map[string][]string) []interface{} {
 	result := make(map[string][]interface{}, len(permissions))
 	var subDirs []map[string]interface{}
