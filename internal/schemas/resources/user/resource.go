@@ -165,6 +165,10 @@ func Get() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"additional_info": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"upload_bandwidth": {
 				Type:     schema.TypeInt,
 				Optional: true,

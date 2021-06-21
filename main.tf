@@ -47,6 +47,11 @@ resource "hashicups_user" "test" {
       ]
     ]
   }
+  filters {
+    allowed_ip = [
+      "0.0.0.0/0"
+    ]
+  }
   password = "asdsa"
   filesystem {
     provider = 2

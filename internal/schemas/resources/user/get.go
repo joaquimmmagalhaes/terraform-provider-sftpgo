@@ -92,22 +92,19 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 	if err := d.Set("last_login", user.LastLogin); err != nil {
 		return diag.FromErr(err)
 	}
-	/*
-		// TODO FIX THIS
-		if err := d.Set("filters", user.Filters); err != nil {
-			return diag.FromErr(err)
-		}
 
-		// TODO FIX THIS
-		if err := d.Set("filesystem", user.FsConfig); err != nil {
-			return diag.FromErr(err)
-		}
+	if err := d.Set("filters", getFilters(user.Filters)); err != nil {
+		return diag.FromErr(err)
+	}
 
-		// TODO FIX THIS
-		if err := d.Set("additional_info", user.AdditionalInfo); err != nil {
-			return diag.FromErr(err)
-		}
-	*/
+	if err := d.Set("filesystem", getFilesystem(user.FsConfig)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("additional_info", user.AdditionalInfo); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return diags
 }
 
@@ -137,6 +134,46 @@ func getPermissions(permissions map[string][]string) []interface{} {
 	}
 
 	result["sub_dirs"] = []interface{}{subDirs}
+
+	return []interface{}{result}
+}
+
+func getFilters(filters models.UserFilters) interface{} {
+	result := make(map[string]interface{})
+
+	result["allowed_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.AllowedIP)
+	result["denied_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedIP)
+	result["denied_login_methods"] = helpers.ConvertStringSliceToInterfaceSlice(filters.AllowedIP)
+
+	fileExtensions := make([]interface{}, len(filters.FileExtensions))
+
+	for i, v := range filters.FileExtensions {
+		fileExtension := make(map[string]interface{})
+
+		fileExtension["path"] = v.Path
+		fileExtension["allowed_extensions"] = helpers.ConvertStringSliceToInterfaceSlice(v.AllowedExtensions)
+		fileExtension["denied_extensions"] = helpers.ConvertStringSliceToInterfaceSlice(v.DeniedExtensions)
+
+		fileExtensions[i] = fileExtension
+	}
+
+	result["file_extensions"] = fileExtensions
+
+	return []interface{}{result}
+}
+
+func getFilesystem(filesystem models.Filesystem) []interface{} {
+	result := make(map[string]interface{})
+
+	result["provider"] = filesystem.Provider
+
+	gcsconfig := make(map[string]interface{})
+	gcsconfig["bucket"] = filesystem.GCSConfig.Bucket
+	gcsconfig["key_prefix"] = filesystem.GCSConfig.KeyPrefix
+	gcsconfig["automatic_credentials"] = filesystem.GCSConfig.AutomaticCredentials
+	gcsconfig["storage_class"] = filesystem.GCSConfig.StorageClass
+
+	result["gcsconfig"] = []interface{}{gcsconfig}
 
 	return []interface{}{result}
 }
