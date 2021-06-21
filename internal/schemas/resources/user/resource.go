@@ -11,7 +11,14 @@ func Get() *schema.Resource {
 		ReadContext:   get,
 		UpdateContext: update,
 		DeleteContext: delete,
+		Importer: &schema.ResourceImporter{
+			StateContext: importer,
+		},
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -21,8 +28,12 @@ func Get() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"expiration_date": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Optional: true,
 			},
 			"password": {
@@ -94,7 +105,7 @@ func Get() *schema.Resource {
 				Default:  0,
 			},
 			"quota_size": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Optional: true,
 				Default:  0,
 			},
@@ -106,7 +117,6 @@ func Get() *schema.Resource {
 			"virtual_folders": {
 				Type:     schema.TypeList,
 				Optional: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -121,22 +131,16 @@ func Get() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"used_quota_size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"used_quota_files": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"last_quota_update": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
 						"users": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem:     schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"virtual_path": {
 							Type:     schema.TypeString,
@@ -150,20 +154,9 @@ func Get() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
+						"filesystem": &fileSystemSchema,
 					},
 				},
-			},
-			"used_quota_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-			"used_quota_files": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-			"last_quota_update": {
-				Type:     schema.TypeInt,
-				Optional: true,
 			},
 			"additional_info": {
 				Type:     schema.TypeString,
@@ -178,10 +171,6 @@ func Get() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  0,
-			},
-			"last_login": {
-				Type:     schema.TypeInt,
-				Optional: true,
 			},
 			"filters": {
 				Type:     schema.TypeList,
@@ -210,24 +199,30 @@ func Get() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
-						"file_extensions": {
+						"denied_protocols": {
 							Type:     schema.TypeList,
 							Optional: true,
-							MaxItems: 1,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"file_patterns": {
+							Type:     schema.TypeList,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"path": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"allowed_extensions": {
+									"allowed_patterns": {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
 									},
-									"denied_extensions": {
+									"denied_patterns": {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
@@ -240,99 +235,76 @@ func Get() *schema.Resource {
 					},
 				},
 			},
-			"filesystem": {
+			"filesystem": &fileSystemSchema,
+		},
+	}
+}
+
+// TODO Add missing filesystems
+var fileSystemSchema = schema.Schema{
+	Type:     schema.TypeList,
+	Optional: true,
+	MaxItems: 1,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"provider": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"gcsconfig": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"provider": {
+						"bucket": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"key_prefix": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"credentials": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"status": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"payload": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"key": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"additional_data": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"mode": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+								},
+							},
+						},
+						"automatic_credentials": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							// ExactlyOneOf: []string{"s3config", "gcsconfig"},
 						},
-						"s3config": {
-							Type:     schema.TypeList,
+						"storage_class": {
+							Type:     schema.TypeString,
 							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"bucket": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"key_prefix": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"region": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"access_key": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"access_secret": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"endpoint": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"storage_class": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"upload_part_size": {
-										Type:     schema.TypeInt,
-										Optional: true,
-									},
-									"upload_concurrency": {
-										Type:     schema.TypeInt,
-										Optional: true,
-									},
-								},
-							},
-						},
-						"gcsconfig": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"bucket": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"key_prefix": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									// TODO FIX THIS
-									"credentials": {
-										Default:  nil,
-										Type:     schema.TypeList,
-										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-									"automatic_credentials": {
-										Type:     schema.TypeInt,
-										Optional: true,
-									},
-									"storage_class": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-								},
-							},
 						},
 					},
 				},
 			},
 		},
-	}
+	},
 }

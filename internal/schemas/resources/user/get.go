@@ -7,6 +7,7 @@ import (
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/helpers"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
+	"strconv"
 )
 
 func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -21,11 +22,19 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 
 	d.SetId(user.Username)
 
+	if err := d.Set("id", strconv.Itoa(user.Id)); err != nil {
+		return diag.FromErr(err)
+	}
+
 	if err := d.Set("status", user.Status); err != nil {
 		return diag.FromErr(err)
 	}
 
 	if err := d.Set("username", user.Username); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("description", user.Description); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -45,11 +54,11 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("uid", user.UID); err != nil {
+	if err := d.Set("uid", user.Uid); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("gid", user.GID); err != nil {
+	if err := d.Set("gid", user.Gid); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -65,19 +74,8 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
+	// TODO Improve this to prevent invalid sort order
 	if err := d.Set("permissions", getPermissions(user.Permissions)); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("used_quota_size", user.UsedQuotaSize); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("used_quota_files", user.UsedQuotaFiles); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("last_quota_update", user.LastQuotaUpdate); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -89,15 +87,11 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("last_login", user.LastLogin); err != nil {
-		return diag.FromErr(err)
-	}
-
 	if err := d.Set("filters", getFilters(user.Filters)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("filesystem", getFilesystem(user.FsConfig)); err != nil {
+	if err := d.Set("filesystem", getFilesystem(user.Filesystem)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -111,8 +105,19 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 func getVirtualFolders(virtualFolders []models.VirtualFolder) []interface{} {
 	result := make([]interface{}, len(virtualFolders))
 
-	for i, v := range virtualFolders {
-		result[i] = v
+	for i, virtualFolder := range virtualFolders {
+		entry := make(map[string]interface{})
+
+		entry["name"] = virtualFolder.Name
+		entry["mapped_path"] = virtualFolder.MappedPath
+		entry["description"] = virtualFolder.Description
+		entry["virtual_path"] = virtualFolder.VirtualPath
+		entry["quota_size"] = virtualFolder.QuotaSize
+		entry["quota_files"] = virtualFolder.QuotaFiles
+		entry["users"] = helpers.ConvertStringSliceToInterfaceSlice(virtualFolder.Users)
+		entry["filesystem"] = getFilesystem(virtualFolder.Filesystem)
+
+		result[i] = entry
 	}
 
 	return result
@@ -138,40 +143,58 @@ func getPermissions(permissions map[string][]string) []interface{} {
 	return []interface{}{result}
 }
 
-func getFilters(filters models.UserFilters) interface{} {
+func getFilters(filters models.Filters) []interface{} {
 	result := make(map[string]interface{})
 
-	result["allowed_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.AllowedIP)
-	result["denied_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedIP)
-	result["denied_login_methods"] = helpers.ConvertStringSliceToInterfaceSlice(filters.AllowedIP)
+	result["allowed_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.AllowedIp)
+	result["denied_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedIp)
+	result["denied_login_methods"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedLoginMethods)
+	result["denied_protocols"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedProtocols)
 
-	fileExtensions := make([]interface{}, len(filters.FileExtensions))
+	filePatterns := make([]interface{}, len(filters.FilePatterns))
 
-	for i, v := range filters.FileExtensions {
+	for i, v := range filters.FilePatterns {
 		fileExtension := make(map[string]interface{})
 
 		fileExtension["path"] = v.Path
-		fileExtension["allowed_extensions"] = helpers.ConvertStringSliceToInterfaceSlice(v.AllowedExtensions)
-		fileExtension["denied_extensions"] = helpers.ConvertStringSliceToInterfaceSlice(v.DeniedExtensions)
+		fileExtension["allowed_patterns"] = helpers.ConvertStringSliceToInterfaceSlice(v.AllowedPatterns)
+		fileExtension["denied_patterns"] = helpers.ConvertStringSliceToInterfaceSlice(v.DeniedPatterns)
 
-		fileExtensions[i] = fileExtension
+		filePatterns[i] = fileExtension
 	}
 
-	result["file_extensions"] = fileExtensions
+	result["file_patterns"] = filePatterns
 
 	return []interface{}{result}
 }
 
+// TODO Add missing filesystems
 func getFilesystem(filesystem models.Filesystem) []interface{} {
 	result := make(map[string]interface{})
 
 	result["provider"] = filesystem.Provider
 
 	gcsconfig := make(map[string]interface{})
-	gcsconfig["bucket"] = filesystem.GCSConfig.Bucket
-	gcsconfig["key_prefix"] = filesystem.GCSConfig.KeyPrefix
-	gcsconfig["automatic_credentials"] = filesystem.GCSConfig.AutomaticCredentials
-	gcsconfig["storage_class"] = filesystem.GCSConfig.StorageClass
+	gcsconfig["bucket"] = filesystem.Gcsconfig.Bucket
+	gcsconfig["key_prefix"] = filesystem.Gcsconfig.KeyPrefix
+	gcsconfig["automatic_credentials"] = filesystem.Gcsconfig.AutomaticCredentials
+	gcsconfig["storage_class"] = filesystem.Gcsconfig.StorageClass
+
+	// Ugly fix to handle empty struct response.
+	if filesystem.Gcsconfig.Credentials.Key != "" ||
+		filesystem.Gcsconfig.Credentials.Status != "" ||
+		filesystem.Gcsconfig.Credentials.Payload != "" ||
+		filesystem.Gcsconfig.Credentials.AdditionalData != "" {
+
+		credentials := make(map[string]interface{})
+		credentials["status"] = filesystem.Gcsconfig.Credentials.Status
+		credentials["payload"] = filesystem.Gcsconfig.Credentials.Payload
+		credentials["key"] = filesystem.Gcsconfig.Credentials.Key
+		credentials["additional_data"] = filesystem.Gcsconfig.Credentials.AdditionalData
+		credentials["mode"] = filesystem.Gcsconfig.Credentials.Mode
+
+		gcsconfig["credentials"] = []interface{}{credentials}
+	}
 
 	result["gcsconfig"] = []interface{}{gcsconfig}
 
