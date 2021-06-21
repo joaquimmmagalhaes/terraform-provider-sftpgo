@@ -79,9 +79,8 @@ func (c *client) UpdateUser(ctx context.Context, username string, admin models.U
 		return err
 	}
 
-	if res.StatusCode != http.StatusConflict {
-		bolB, _ := json.Marshal(admin)
-		return fmt.Errorf("status: %d, body: %s, payload: %s", res.StatusCode, body, bolB)
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 
 	return err
