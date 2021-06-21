@@ -28,7 +28,7 @@ func convertToStruct(d *schema.ResourceData) models.User {
 	user.UploadBandwidth = d.Get("upload_bandwidth").(int)
 	user.DownloadBandwidth = d.Get("download_bandwidth").(int)
 	user.LastLogin = d.Get("last_login").(int)
-	// user.Filters = flattenFilters(d.Get("filters"))
+	user.Filters = flattenFilters(d.Get("filters"))
 	user.FsConfig = flattenFileSystem(d.Get("filesystem"))
 
 	return user
@@ -117,35 +117,41 @@ func flattenPermissions(data interface{}) map[string][]string {
 
 func flattenFilters(data interface{}) models.UserFilters {
 	var result models.UserFilters
-	items := data.(map[string]interface{})
+	items := data.([]interface{})
 
-	if v, ok := items["allowed_ip"]; ok {
-		result.AllowedIP = v.([]string)
-	}
+	if len(items) > 0 {
+		items := items[0].(map[string]interface{})
 
-	if v, ok := items["denied_ip"]; ok {
-		result.DeniedIP = v.([]string)
-	}
+		if v, ok := items["allowed_ip"]; ok {
+			result.AllowedIP = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+		}
 
-	if v, ok := items["denied_login_methods"]; ok {
-		result.DeniedLoginMethods = v.([]string)
-	}
+		if v, ok := items["denied_ip"]; ok {
+			result.DeniedIP = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+		}
 
-	if v, ok := items["file_extensions"]; ok {
-		fileExtensions := v.([]map[string]interface{})
-		result.FileExtensions = make([]models.ExtensionsFilter, len(fileExtensions))
+		if v, ok := items["denied_login_methods"]; ok {
+			result.DeniedLoginMethods = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+		}
 
-		for i, fileExtension := range fileExtensions {
-			if v, ok = fileExtension["path"]; ok {
-				result.FileExtensions[i].Path = v.(string)
-			}
+		if v, ok := items["file_extensions"]; ok {
+			fileExtensions := v.([]interface{})
 
-			if v, ok = fileExtension["allowed_extensions"]; ok {
-				result.FileExtensions[i].AllowedExtensions = v.([]string)
-			}
+			if len(fileExtensions) > 0 {
+				fileExtensions := fileExtensions[0].(map[string]interface{})
+				result.FileExtensions = make([]models.ExtensionsFilter, len(fileExtensions))
 
-			if v, ok = fileExtension["denied_extensions"]; ok {
-				result.FileExtensions[i].DeniedExtensions = v.([]string)
+				if v, ok = fileExtensions["path"]; ok {
+					result.FileExtensions[0].Path = v.(string)
+				}
+
+				if v, ok = fileExtensions["allowed_extensions"]; ok {
+					result.FileExtensions[0].AllowedExtensions = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+				}
+
+				if v, ok = fileExtensions["denied_extensions"]; ok {
+					result.FileExtensions[0].DeniedExtensions = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+				}
 			}
 		}
 	}

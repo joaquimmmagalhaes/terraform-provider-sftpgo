@@ -5,10 +5,10 @@ type User struct {
 	Status            int                 `json:"status"`
 	Username          string              `json:"username"`
 	ExpirationDate    int                 `json:"expiration_date"`
-	Password          string              `json:"password,omitempty"`
-	PublicKeys        []string            `json:"public_keys,omitempty"`
+	Password          string              `json:"password"`
+	PublicKeys        []string            `json:"public_keys"`
 	HomeDir           string              `json:"home_dir"`
-	VirtualFolders    []VirtualFolder     `json:"virtual_folders,omitempty"`
+	VirtualFolders    []VirtualFolder     `json:"virtual_folders"`
 	UID               int                 `json:"uid"`
 	GID               int                 `json:"gid"`
 	MaxSessions       int                 `json:"max_sessions"`
@@ -23,68 +23,68 @@ type User struct {
 	LastLogin         int                 `json:"last_login"`
 	Filters           UserFilters         `json:"filters"`
 	FsConfig          Filesystem          `json:"filesystem"`
-	AdditionalInfo    string              `json:"additional_info,omitempty"`
+	AdditionalInfo    string              `json:"additional_info"`
 }
 
 type ExtensionsFilter struct {
 	Path              string   `json:"path"`
-	AllowedExtensions []string `json:"allowed_extensions,omitempty"`
-	DeniedExtensions  []string `json:"denied_extensions,omitempty"`
+	AllowedExtensions []string `json:"allowed_extensions"`
+	DeniedExtensions  []string `json:"denied_extensions"`
 }
 
 type UserFilters struct {
-	AllowedIP          []string           `json:"allowed_ip,omitempty"`
-	DeniedIP           []string           `json:"denied_ip,omitempty"`
-	DeniedLoginMethods []string           `json:"denied_login_methods,omitempty"`
-	FileExtensions     []ExtensionsFilter `json:"file_extensions,omitempty"`
+	AllowedIP          []string           `json:"allowed_ip"`
+	DeniedIP           []string           `json:"denied_ip"`
+	DeniedLoginMethods []string           `json:"denied_login_methods"`
+	FileExtensions     []ExtensionsFilter `json:"file_extensions"`
 }
 
 type S3FsConfig struct {
-	Bucket            string      `json:"bucket,omitempty"`
-	KeyPrefix         string      `json:"key_prefix,omitempty"`
-	Region            string      `json:"region,omitempty"`
-	AccessKey         string      `json:"access_key,omitempty"`
-	AccessSecret      interface{} `json:"access_secret,omitempty"`
-	Endpoint          string      `json:"endpoint,omitempty"`
-	StorageClass      string      `json:"storage_class,omitempty"`
-	UploadPartSize    int         `json:"upload_part_size,omitempty"`
-	UploadConcurrency int         `json:"upload_concurrency,omitempty"`
+	Bucket            string      `json:"bucket"`
+	KeyPrefix         string      `json:"key_prefix"`
+	Region            string      `json:"region"`
+	AccessKey         string      `json:"access_key"`
+	AccessSecret      interface{} `json:"access_secret"`
+	Endpoint          string      `json:"endpoint"`
+	StorageClass      string      `json:"storage_class"`
+	UploadPartSize    int         `json:"upload_part_size"`
+	UploadConcurrency int         `json:"upload_concurrency"`
 }
 
 type SecretStatus = string
 
 type FileSystemCredentials struct {
-	Status         SecretStatus `json:"status,omitempty"`
-	Payload        string       `json:"payload,omitempty"`
-	Key            string       `json:"key,omitempty"`
-	AdditionalData string       `json:"additional_data,omitempty"`
+	Status         SecretStatus `json:"status"`
+	Payload        string       `json:"payload"`
+	Key            string       `json:"key"`
+	AdditionalData string       `json:"additional_data"`
 	// 1 means encrypted using a master key
-	Mode int `json:"mode,omitempty"`
+	Mode int `json:"mode"`
 }
 
 // TODO FIX
 type GCSFsConfig struct {
-	Bucket               string                 `json:"bucket,omitempty"`
-	KeyPrefix            string                 `json:"key_prefix,omitempty"`
-	Credentials          *FileSystemCredentials `json:"credentials,omitempty"`
-	AutomaticCredentials int                    `json:"automatic_credentials,omitempty"`
-	StorageClass         string                 `json:"storage_class,omitempty"`
+	Bucket               string                 `json:"bucket"`
+	KeyPrefix            string                 `json:"key_prefix"`
+	Credentials          *FileSystemCredentials `json:"credentials"`
+	AutomaticCredentials int                    `json:"automatic_credentials"`
+	StorageClass         string                 `json:"storage_class"`
 }
 
 type Filesystem struct {
 	Provider  int         `json:"provider"`
-	S3Config  S3FsConfig  `json:"s3config,omitempty"`
-	GCSConfig GCSFsConfig `json:"gcsconfig,omitempty"`
+	S3Config  S3FsConfig  `json:"s3config"`
+	GCSConfig GCSFsConfig `json:"gcsconfig"`
 }
 
 type BaseVirtualFolder struct {
 	ID              int      `json:"id"`
 	Name            string   `json:"name"`
-	MappedPath      string   `json:"mapped_path,omitempty"`
+	MappedPath      string   `json:"mapped_path"`
 	UsedQuotaSize   int      `json:"used_quota_size"`
 	UsedQuotaFiles  int      `json:"used_quota_files"`
 	LastQuotaUpdate int      `json:"last_quota_update"`
-	Users           []string `json:"users,omitempty"`
+	Users           []string `json:"users"`
 }
 
 type VirtualFolder struct {
