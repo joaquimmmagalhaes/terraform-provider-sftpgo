@@ -1,34 +1,26 @@
 package models
 
 type User struct {
-	Id             int                 `json:"id,omitempty"`
-	Status         int                 `json:"status"`
-	Username       string              `json:"username"`
-	Description    string              `json:"description"`
-	ExpirationDate float64             `json:"expiration_date"`
-	Password       string              `json:"password"`
-	PublicKeys     []string            `json:"public_keys"`
-	HomeDir        string              `json:"home_dir"`
-	Permissions    map[string][]string `json:"permissions"`
-	Uid            int                 `json:"uid"`
-	Gid            int                 `json:"gid"`
-	MaxSessions    int                 `json:"max_sessions"`
-	QuotaSize      float64             `json:"quota_size"`
-	QuotaFiles     int                 `json:"quota_files"`
-	VirtualFolders []VirtualFolder     `json:"virtual_folders"`
-	// Just for mapping. Not used
-	UsedQuotaSize float64 `json:"used_quota_size"`
-	// Just for mapping. Not used
-	UsedQuotaFiles int `json:"used_quota_files"`
-	// Just for mapping. Not used
-	LastQuotaUpdate   float64 `json:"last_quota_update"`
-	UploadBandwidth   int     `json:"upload_bandwidth"`
-	DownloadBandwidth int     `json:"download_bandwidth"`
-	// Just for mapping. Not used
-	LastLogin      float64    `json:"last_login"`
-	Filters        Filters    `json:"filters"`
-	Filesystem     Filesystem `json:"filesystem"`
-	AdditionalInfo string     `json:"additional_info"`
+	Id                int                 `json:"id,omitempty"`
+	Status            int                 `json:"status"`
+	Username          string              `json:"username"`
+	Description       string              `json:"description"`
+	ExpirationDate    float64             `json:"expiration_date"`
+	Password          string              `json:"password"`
+	PublicKeys        []string            `json:"public_keys"`
+	HomeDir           string              `json:"home_dir"`
+	Permissions       map[string][]string `json:"permissions"`
+	Uid               int                 `json:"uid"`
+	Gid               int                 `json:"gid"`
+	MaxSessions       int                 `json:"max_sessions"`
+	QuotaSize         float64             `json:"quota_size"`
+	QuotaFiles        int                 `json:"quota_files"`
+	VirtualFolders    []VirtualFolder     `json:"virtual_folders"`
+	UploadBandwidth   int                 `json:"upload_bandwidth"`
+	DownloadBandwidth int                 `json:"download_bandwidth"`
+	Filters           Filters             `json:"filters"`
+	Filesystem        Filesystem          `json:"filesystem"`
+	AdditionalInfo    string              `json:"additional_info"`
 }
 
 type VirtualFolder struct {
