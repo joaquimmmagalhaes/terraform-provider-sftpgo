@@ -21,5 +21,9 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 
 	// TODO Map all the fields xD
 
+
+
+
+
 	return diags
 }
