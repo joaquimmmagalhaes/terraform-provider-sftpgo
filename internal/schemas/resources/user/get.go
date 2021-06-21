@@ -34,6 +34,10 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
+	if err := d.Set("description", user.Description); err != nil {
+		return diag.FromErr(err)
+	}
+
 	if err := d.Set("expiration_date", user.ExpirationDate); err != nil {
 		return diag.FromErr(err)
 	}
@@ -70,6 +74,7 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
+	// TODO Improve this to prevent invalid sort order
 	if err := d.Set("permissions", getPermissions(user.Permissions)); err != nil {
 		return diag.FromErr(err)
 	}
@@ -100,8 +105,19 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 func getVirtualFolders(virtualFolders []models.VirtualFolder) []interface{} {
 	result := make([]interface{}, len(virtualFolders))
 
-	for i, v := range virtualFolders {
-		result[i] = v
+	for i, virtualFolder := range virtualFolders {
+		entry := make(map[string]interface{})
+
+		entry["name"] = virtualFolder.Name
+		entry["mapped_path"] = virtualFolder.MappedPath
+		entry["description"] = virtualFolder.Description
+		entry["virtual_path"] = virtualFolder.VirtualPath
+		entry["quota_size"] = virtualFolder.QuotaSize
+		entry["quota_files"] = virtualFolder.QuotaFiles
+		entry["users"] = helpers.ConvertStringSliceToInterfaceSlice(virtualFolder.Users)
+		entry["filesystem"] = getFilesystem(virtualFolder.Filesystem)
+
+		result[i] = entry
 	}
 
 	return result
@@ -134,6 +150,10 @@ func getFilters(filters models.Filters) []interface{} {
 	result["denied_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedIp)
 	result["denied_login_methods"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedLoginMethods)
 	result["denied_protocols"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedProtocols)
+	result["max_upload_file_size"] = filters.MaxUploadFileSize
+	result["tls_username"] = filters.TlsUsername
+	result["disable_fs_checks"] = filters.DisableFsChecks
+	result["web_client"] = helpers.ConvertStringSliceToInterfaceSlice(filters.WebClient)
 
 	filePatterns := make([]interface{}, len(filters.FilePatterns))
 
@@ -141,17 +161,25 @@ func getFilters(filters models.Filters) []interface{} {
 		fileExtension := make(map[string]interface{})
 
 		fileExtension["path"] = v.Path
-		fileExtension["allowed_extensions"] = helpers.ConvertStringSliceToInterfaceSlice(v.AllowedPatterns)
-		fileExtension["denied_extensions"] = helpers.ConvertStringSliceToInterfaceSlice(v.DeniedPatterns)
+		fileExtension["allowed_patterns"] = helpers.ConvertStringSliceToInterfaceSlice(v.AllowedPatterns)
+		fileExtension["denied_patterns"] = helpers.ConvertStringSliceToInterfaceSlice(v.DeniedPatterns)
 
 		filePatterns[i] = fileExtension
 	}
 
 	result["file_patterns"] = filePatterns
 
+	hooks := make(map[string]interface{})
+	hooks["external_auth_disabled"] = filters.Hooks.ExternalAuthDisabled
+	hooks["pre_login_disabled"] = filters.Hooks.PreLoginDisabled
+	hooks["check_password_disabled"] = filters.Hooks.CheckPasswordDisabled
+
+	result["hooks"] = []interface{}{hooks}
+
 	return []interface{}{result}
 }
 
+// TODO Add missing filesystems
 func getFilesystem(filesystem models.Filesystem) []interface{} {
 	result := make(map[string]interface{})
 
@@ -162,6 +190,15 @@ func getFilesystem(filesystem models.Filesystem) []interface{} {
 	gcsconfig["key_prefix"] = filesystem.Gcsconfig.KeyPrefix
 	gcsconfig["automatic_credentials"] = filesystem.Gcsconfig.AutomaticCredentials
 	gcsconfig["storage_class"] = filesystem.Gcsconfig.StorageClass
+
+	credentials := make(map[string]interface{})
+	credentials["status"] = filesystem.Gcsconfig.Credentials.Status
+	credentials["payload"] = filesystem.Gcsconfig.Credentials.Payload
+	credentials["key"] = filesystem.Gcsconfig.Credentials.Key
+	credentials["additional_data"] = filesystem.Gcsconfig.Credentials.AdditionalData
+	credentials["mode"] = filesystem.Gcsconfig.Credentials.Mode
+
+	gcsconfig["credentials"] = []interface{}{credentials}
 
 	result["gcsconfig"] = []interface{}{gcsconfig}
 

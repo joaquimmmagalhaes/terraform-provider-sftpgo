@@ -11,8 +11,8 @@ func convertToStruct(d *schema.ResourceData) models.User {
 
 	user.Status = d.Get("status").(int)
 	user.Username = d.Get("username").(string)
+	user.Description = d.Get("description").(string)
 	user.ExpirationDate = d.Get("expiration_date").(float64)
-	user.Password = d.Get("password").(string)
 	user.PublicKeys = helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
 	user.HomeDir = d.Get("home_dir").(string)
 	user.VirtualFolders = flattenVirtualFolders(d.Get("virtual_folders"))
@@ -38,12 +38,20 @@ func flattenVirtualFolders(data interface{}) []models.VirtualFolder {
 		folder := item.(map[string]interface{})
 		var entry models.VirtualFolder
 
+		if v, ok := folder["id"]; ok {
+			entry.Id = v.(int)
+		}
+
 		if v, ok := folder["name"]; ok {
 			entry.Name = v.(string)
 		}
 
 		if v, ok := folder["mapped_path"]; ok {
 			entry.MappedPath = v.(string)
+		}
+
+		if v, ok := folder["description"]; ok {
+			entry.Description = v.(string)
 		}
 
 		if v, ok := folder["users"]; ok {
@@ -60,6 +68,10 @@ func flattenVirtualFolders(data interface{}) []models.VirtualFolder {
 
 		if v, ok := folder["quota_files"]; ok {
 			entry.QuotaFiles = v.(int)
+		}
+
+		if v, ok := folder["filesystem"]; ok {
+			entry.Filesystem = flattenFileSystem(v)
 		}
 
 		result = append(result, entry)
@@ -118,7 +130,40 @@ func flattenFilters(data interface{}) models.Filters {
 			result.DeniedLoginMethods = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 		}
 
-		if v, ok := items["file_extensions"]; ok {
+		if v, ok := items["max_upload_file_size"]; ok {
+			result.MaxUploadFileSize = v.(int)
+		}
+
+		if v, ok := items["tls_username"]; ok {
+			result.TlsUsername = v.(string)
+		}
+
+		if v, ok := items["disable_fs_checks"]; ok {
+			result.DisableFsChecks = v.(bool)
+		}
+
+		if v, ok := items["web_client"]; ok {
+			result.WebClient = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+		}
+
+		hooksItems := data.([]interface{})
+		if len(hooksItems) > 0 {
+			hooksItems := hooksItems[0].(map[string]interface{})
+
+			if v, ok := hooksItems["external_auth_disabled"]; ok {
+				result.Hooks.ExternalAuthDisabled = v.(bool)
+			}
+
+			if v, ok := hooksItems["pre_login_disabled"]; ok {
+				result.Hooks.PreLoginDisabled = v.(bool)
+			}
+
+			if v, ok := hooksItems["check_password_disabled"]; ok {
+				result.Hooks.CheckPasswordDisabled = v.(bool)
+			}
+		}
+
+		if v, ok := items["file_patterns"]; ok {
 			fileExtensions := v.([]interface{})
 
 			if len(fileExtensions) > 0 {
@@ -129,11 +174,11 @@ func flattenFilters(data interface{}) models.Filters {
 					result.FilePatterns[0].Path = v.(string)
 				}
 
-				if v, ok = fileExtensions["allowed_extensions"]; ok {
+				if v, ok = fileExtensions["allowed_patterns"]; ok {
 					result.FilePatterns[0].AllowedPatterns = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 				}
 
-				if v, ok = fileExtensions["denied_extensions"]; ok {
+				if v, ok = fileExtensions["denied_patterns"]; ok {
 					result.FilePatterns[0].DeniedPatterns = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 				}
 			}
@@ -153,47 +198,7 @@ func flattenFileSystem(data interface{}) models.Filesystem {
 		if v, ok := items["provider"]; ok {
 			result.Provider = v.(int)
 		}
-		/*
-			if v, ok := items["s3config"]; ok {
-				s3config := v.(map[string]interface{})
 
-				if v, ok = s3config["bucket"]; ok {
-					result.S3Config.Bucket = v.(string)
-				}
-
-				if v, ok = s3config["key_prefix"]; ok {
-					result.S3Config.KeyPrefix = v.(string)
-				}
-
-				if v, ok = s3config["region"]; ok {
-					result.S3Config.Region = v.(string)
-				}
-
-				if v, ok = s3config["access_key"]; ok {
-					result.S3Config.AccessKey = v.(string)
-				}
-
-				if v, ok = s3config["access_secret"]; ok {
-					result.S3Config.AccessSecret = v.(string)
-				}
-
-				if v, ok = s3config["endpoint"]; ok {
-					result.S3Config.Endpoint = v.(string)
-				}
-
-				if v, ok = s3config["storage_class"]; ok {
-					result.S3Config.StorageClass = v.(string)
-				}
-
-				if v, ok = s3config["upload_part_size"]; ok {
-					result.S3Config.UploadPartSize = v.(int)
-				}
-
-				if v, ok = s3config["upload_concurrency"]; ok {
-					result.S3Config.UploadConcurrency = v.(int)
-				}
-			}
-		*/
 		if v, ok := items["gcsconfig"]; ok {
 			gcsconfig := v.([]interface{})
 
@@ -209,12 +214,30 @@ func flattenFileSystem(data interface{}) models.Filesystem {
 					config.KeyPrefix = v.(string)
 				}
 
-				// TODO FIX
-				// if v, ok = gcsconfig["credentials"]; ok {
-				// 	result.GCSConfig.Credentials = v.(*models.FileSystemCredentials)
-				// } else {
-				// 	result.GCSConfig.Credentials = nil
-				// }
+				if v, ok := items["credentials"]; ok {
+					credentials := v.([]interface{})
+
+					if len(credentials) > 0 {
+						credentials := credentials[0].(map[string]interface{})
+						var credentialsConfig models.GcsCredentials
+
+						if v, ok = credentials["status"]; ok {
+							credentialsConfig.Status = v.(string)
+						}
+						if v, ok = credentials["payload"]; ok {
+							credentialsConfig.Payload = v.(string)
+						}
+						if v, ok = credentials["key"]; ok {
+							credentialsConfig.Key = v.(string)
+						}
+						if v, ok = credentials["additional_data"]; ok {
+							credentialsConfig.AdditionalData = v.(string)
+						}
+						if v, ok = credentials["mode"]; ok {
+							credentialsConfig.Mode = v.(int)
+						}
+					}
+				}
 
 				if v, ok = gcsconfig["automatic_credentials"]; ok {
 					config.AutomaticCredentials = v.(int)

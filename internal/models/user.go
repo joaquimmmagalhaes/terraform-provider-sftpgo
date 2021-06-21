@@ -9,13 +9,13 @@ type User struct {
 	Password       string              `json:"password"`
 	PublicKeys     []string            `json:"public_keys"`
 	HomeDir        string              `json:"home_dir"`
-	VirtualFolders []VirtualFolder     `json:"virtual_folders"`
+	Permissions    map[string][]string `json:"permissions"`
 	Uid            int                 `json:"uid"`
 	Gid            int                 `json:"gid"`
 	MaxSessions    int                 `json:"max_sessions"`
 	QuotaSize      float64             `json:"quota_size"`
 	QuotaFiles     int                 `json:"quota_files"`
-	Permissions    map[string][]string `json:"permissions"`
+	VirtualFolders []VirtualFolder     `json:"virtual_folders"`
 	// Just for mapping. Not used
 	UsedQuotaSize float64 `json:"used_quota_size"`
 	// Just for mapping. Not used
@@ -32,25 +32,25 @@ type User struct {
 }
 
 type VirtualFolder struct {
-	Id          int    `json:"id"`
-	Name        string `json:"name"`
-	MappedPath  string `json:"mapped_path"`
-	Description string `json:"description"`
+	Id          int      `json:"id"`
+	Name        string   `json:"name"`
+	MappedPath  string   `json:"mapped_path"`
+	Users       []string `json:"users"`
+	Description string   `json:"description"`
+	QuotaSize   int      `json:"quota_size"`
+	QuotaFiles  int      `json:"quota_files"`
+	VirtualPath string   `json:"virtual_path"`
 	// Just for mapping. Not used
 	UsedQuotaSize int `json:"used_quota_size"`
 	// Just for mapping. Not used
 	UsedQuotaFiles int `json:"used_quota_files"`
 	// Just for mapping. Not used
 	LastQuotaUpdate int        `json:"last_quota_update"`
-	Users           []string   `json:"users"`
 	Filesystem      Filesystem `json:"filesystem"`
-	VirtualPath     string     `json:"virtual_path"`
-	QuotaSize       int        `json:"quota_size"`
-	QuotaFiles      int        `json:"quota_files"`
 }
 
 type Filesystem struct {
-	Provider     int          `json:"provider"`
+	Provider     int           `json:"provider"`
 	S3Config     *S3Config     `json:"s3config,omitempty"`
 	Gcsconfig    *Gcsconfig    `json:"gcsconfig,omitempty"`
 	Azblobconfig *Azblobconfig `json:"azblobconfig,omitempty"`

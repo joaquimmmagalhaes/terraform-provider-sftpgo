@@ -10,12 +10,15 @@ import (
 func create(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(api.Client)
 
-	admin, err := c.CreateUser(ctx, convertToStruct(d))
+	user := convertToStruct(d)
+	user.Password = d.Get("password").(string)
+
+	result, err := c.CreateUser(ctx, user)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(admin.Username)
+	d.SetId(result.Username)
 
 	return get(ctx, d, m)
 }
