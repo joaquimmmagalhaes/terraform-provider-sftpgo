@@ -32,11 +32,17 @@ resource "hashicups_admin" "test" {
 resource "hashicups_user" "test" {
   username = "terraform13"
   home_dir = "/mp"
-/*  permissions = {
-    "/" = [
-      "*"
+  permissions {
+    global = [ "abcc" ]
+    sub_dirs = [
+      [
+        {
+          folder = "/test"
+          permission = ["abc"]
+        }
+      ]
     ]
-  }*/
+  }
   password = "asdsa"
   filesystem {
     provider = 0
