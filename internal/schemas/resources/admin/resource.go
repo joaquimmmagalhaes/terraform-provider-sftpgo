@@ -2,12 +2,11 @@ package admin
 
 import (
 	"context"
-	"crypto/sha256"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/api"
 	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/models"
+	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/resources"
 )
 
 func Get() *schema.Resource {
@@ -36,7 +35,7 @@ func Get() *schema.Resource {
 				Optional: true,
 			},
 			"password": {
-				StateFunc: hashSum,
+				StateFunc: resources.HashSum,
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Required:  true,
@@ -117,10 +116,6 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 	}
 
 	return diags
-}
-
-func hashSum(contents interface{}) string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(contents.(string))))
 }
 
 func flattenFilters(filters models.AdminFilters) []interface{} {

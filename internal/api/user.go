@@ -39,7 +39,7 @@ func (c *client) CreateUser(ctx context.Context, admin models.User) (*models.Use
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v2/admins", c.HostURL), strings.NewReader(string(rb)))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v2/users", c.HostURL), strings.NewReader(string(rb)))
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,8 @@ func (c *client) CreateUser(ctx context.Context, admin models.User) (*models.Use
 	}
 
 	if res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+		bolB, _ := json.Marshal(admin)
+		return nil, fmt.Errorf("status: %d, body: %s, payload: %s", res.StatusCode, body, bolB)
 	}
 
 	order := models.User{}

@@ -40,23 +40,35 @@ type UserFilters struct {
 }
 
 type S3FsConfig struct {
-	Bucket            string `json:"bucket,omitempty"`
-	KeyPrefix         string `json:"key_prefix,omitempty"`
-	Region            string `json:"region,omitempty"`
-	AccessKey         string `json:"access_key,omitempty"`
-	AccessSecret      string `json:"access_secret,omitempty"`
-	Endpoint          string `json:"endpoint,omitempty"`
-	StorageClass      string `json:"storage_class,omitempty"`
-	UploadPartSize    int    `json:"upload_part_size,omitempty"`
-	UploadConcurrency int    `json:"upload_concurrency,omitempty"`
+	Bucket            string      `json:"bucket,omitempty"`
+	KeyPrefix         string      `json:"key_prefix,omitempty"`
+	Region            string      `json:"region,omitempty"`
+	AccessKey         string      `json:"access_key,omitempty"`
+	AccessSecret      interface{} `json:"access_secret,omitempty"`
+	Endpoint          string      `json:"endpoint,omitempty"`
+	StorageClass      string      `json:"storage_class,omitempty"`
+	UploadPartSize    int         `json:"upload_part_size,omitempty"`
+	UploadConcurrency int         `json:"upload_concurrency,omitempty"`
 }
 
+type SecretStatus = string
+
+type FileSystemCredentials struct {
+	Status         SecretStatus `json:"status,omitempty"`
+	Payload        string       `json:"payload,omitempty"`
+	Key            string       `json:"key,omitempty"`
+	AdditionalData string       `json:"additional_data,omitempty"`
+	// 1 means encrypted using a master key
+	Mode int `json:"mode,omitempty"`
+}
+
+// TODO FIX
 type GCSFsConfig struct {
-	Bucket               string `json:"bucket,omitempty"`
-	KeyPrefix            string `json:"key_prefix,omitempty"`
-	Credentials          string `json:"credentials,omitempty"`
-	AutomaticCredentials int    `json:"automatic_credentials,omitempty"`
-	StorageClass         string `json:"storage_class,omitempty"`
+	Bucket               string                 `json:"bucket,omitempty"`
+	KeyPrefix            string                 `json:"key_prefix,omitempty"`
+	Credentials          *FileSystemCredentials `json:"credentials,omitempty"`
+	AutomaticCredentials int                    `json:"automatic_credentials,omitempty"`
+	StorageClass         string                 `json:"storage_class,omitempty"`
 }
 
 type Filesystem struct {

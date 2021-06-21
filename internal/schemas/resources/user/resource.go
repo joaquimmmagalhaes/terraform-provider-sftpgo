@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/joaquimmmagalhaes/terraform-provider-drakkan-sftpgo/internal/schemas/resources"
 )
 
 func Get() *schema.Resource {
@@ -25,14 +26,14 @@ func Get() *schema.Resource {
 				Optional: true,
 			},
 			"password": {
+				StateFunc: resources.HashSum,
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 			},
 			"public_keys": {
-				Type:      schema.TypeList,
-				Optional:  true,
-				Sensitive: true,
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -305,9 +306,14 @@ func Get() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									// TODO FIX THIS
 									"credentials": {
-										Type:     schema.TypeString,
+										Default:  nil,
+										Type:     schema.TypeList,
 										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
 									},
 									"automatic_credentials": {
 										Type:     schema.TypeInt,

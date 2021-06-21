@@ -12,7 +12,7 @@ provider "hashicups" {
   username = "jmagalhaes"
   password = "jmagalhaes"
 }
-
+/*
 resource "hashicups_admin" "test" {
   username = "terraform13"
   permissions = ["add_users", "edit_users"]
@@ -27,25 +27,29 @@ resource "hashicups_admin" "test" {
   }
 
   additional_info = "BOM DIAAAAAAAAAAAAAA"
-}
+}*/
 
 resource "hashicups_user" "test" {
-  username = "terraform13"
+  username = "terraform19"
   home_dir = "/mp"
   permissions {
-    global = [ "abcc" ]
+    global = [ "*" ]
     sub_dirs = [
       [
         {
           folder = "/test"
-          permission = ["abc"]
+          permission = ["*"]
+        },
+        {
+          folder = "/test2"
+          permission = ["*"]
         }
       ]
     ]
   }
   password = "asdsa"
   filesystem {
-    provider = 0
+    provider = 2
     gcsconfig {
       bucket = "sword-sftp-test"
       automatic_credentials = 1
