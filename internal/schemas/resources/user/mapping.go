@@ -130,39 +130,6 @@ func flattenFilters(data interface{}) models.Filters {
 			result.DeniedLoginMethods = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 		}
 
-		if v, ok := items["max_upload_file_size"]; ok {
-			result.MaxUploadFileSize = v.(int)
-		}
-
-		if v, ok := items["tls_username"]; ok {
-			result.TlsUsername = v.(string)
-		}
-
-		if v, ok := items["disable_fs_checks"]; ok {
-			result.DisableFsChecks = v.(bool)
-		}
-
-		if v, ok := items["web_client"]; ok {
-			result.WebClient = helpers.ConvertFromInterfaceSliceToStringSlice(v)
-		}
-
-		hooksItems := data.([]interface{})
-		if len(hooksItems) > 0 {
-			hooksItems := hooksItems[0].(map[string]interface{})
-
-			if v, ok := hooksItems["external_auth_disabled"]; ok {
-				result.Hooks.ExternalAuthDisabled = v.(bool)
-			}
-
-			if v, ok := hooksItems["pre_login_disabled"]; ok {
-				result.Hooks.PreLoginDisabled = v.(bool)
-			}
-
-			if v, ok := hooksItems["check_password_disabled"]; ok {
-				result.Hooks.CheckPasswordDisabled = v.(bool)
-			}
-		}
-
 		if v, ok := items["file_patterns"]; ok {
 			fileExtensions := v.([]interface{})
 
@@ -224,18 +191,24 @@ func flattenFileSystem(data interface{}) models.Filesystem {
 						if v, ok = credentials["status"]; ok {
 							credentialsConfig.Status = v.(string)
 						}
+
 						if v, ok = credentials["payload"]; ok {
 							credentialsConfig.Payload = v.(string)
 						}
+
 						if v, ok = credentials["key"]; ok {
 							credentialsConfig.Key = v.(string)
 						}
+
 						if v, ok = credentials["additional_data"]; ok {
 							credentialsConfig.AdditionalData = v.(string)
 						}
+
 						if v, ok = credentials["mode"]; ok {
 							credentialsConfig.Mode = v.(int)
 						}
+
+						config.Credentials = credentialsConfig
 					}
 				}
 

@@ -105,19 +105,11 @@ type AzAccountKey struct {
 	Mode           int    `json:"mode"`
 }
 
-type AzSasUrl struct {
-	Status         string `json:"status"`
-	Payload        string `json:"payload"`
-	Key            string `json:"key"`
-	AdditionalData string `json:"additional_data"`
-	Mode           int    `json:"mode"`
-}
-
 type Azblobconfig struct {
 	Container         string       `json:"container"`
 	AccountName       string       `json:"account_name"`
 	AccountKey        AzAccountKey `json:"account_key"`
-	SasUrl            AzSasUrl     `json:"sas_url"`
+	SasUrl            string       `json:"sas_url"`
 	Endpoint          string       `json:"endpoint"`
 	UploadPartSize    int          `json:"upload_part_size"`
 	UploadConcurrency int          `json:"upload_concurrency"`
@@ -136,7 +128,7 @@ type GcsCredentials struct {
 
 type Gcsconfig struct {
 	Bucket               string         `json:"bucket"`
-	Credentials          GcsCredentials `json:"credentials"`
+	Credentials          GcsCredentials `json:"credentials,omitempty"`
 	AutomaticCredentials int            `json:"automatic_credentials"`
 	StorageClass         string         `json:"storage_class"`
 	KeyPrefix            string         `json:"key_prefix"`
@@ -168,21 +160,10 @@ type FilePatterns struct {
 	DeniedPatterns  []string `json:"denied_patterns"`
 }
 
-type Hooks struct {
-	ExternalAuthDisabled  bool `json:"external_auth_disabled"`
-	PreLoginDisabled      bool `json:"pre_login_disabled"`
-	CheckPasswordDisabled bool `json:"check_password_disabled"`
-}
-
 type Filters struct {
 	AllowedIp          []string       `json:"allowed_ip"`
 	DeniedIp           []string       `json:"denied_ip"`
 	DeniedLoginMethods []string       `json:"denied_login_methods"`
 	DeniedProtocols    []string       `json:"denied_protocols"`
 	FilePatterns       []FilePatterns `json:"file_patterns"`
-	MaxUploadFileSize  int            `json:"max_upload_file_size"`
-	TlsUsername        string         `json:"tls_username"`
-	Hooks              Hooks          `json:"hooks"`
-	DisableFsChecks    bool           `json:"disable_fs_checks"`
-	WebClient          []string       `json:"web_client"`
 }

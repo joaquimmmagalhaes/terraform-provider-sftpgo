@@ -150,10 +150,6 @@ func getFilters(filters models.Filters) []interface{} {
 	result["denied_ip"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedIp)
 	result["denied_login_methods"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedLoginMethods)
 	result["denied_protocols"] = helpers.ConvertStringSliceToInterfaceSlice(filters.DeniedProtocols)
-	result["max_upload_file_size"] = filters.MaxUploadFileSize
-	result["tls_username"] = filters.TlsUsername
-	result["disable_fs_checks"] = filters.DisableFsChecks
-	result["web_client"] = helpers.ConvertStringSliceToInterfaceSlice(filters.WebClient)
 
 	filePatterns := make([]interface{}, len(filters.FilePatterns))
 
@@ -168,13 +164,6 @@ func getFilters(filters models.Filters) []interface{} {
 	}
 
 	result["file_patterns"] = filePatterns
-
-	hooks := make(map[string]interface{})
-	hooks["external_auth_disabled"] = filters.Hooks.ExternalAuthDisabled
-	hooks["pre_login_disabled"] = filters.Hooks.PreLoginDisabled
-	hooks["check_password_disabled"] = filters.Hooks.CheckPasswordDisabled
-
-	result["hooks"] = []interface{}{hooks}
 
 	return []interface{}{result}
 }
@@ -191,14 +180,21 @@ func getFilesystem(filesystem models.Filesystem) []interface{} {
 	gcsconfig["automatic_credentials"] = filesystem.Gcsconfig.AutomaticCredentials
 	gcsconfig["storage_class"] = filesystem.Gcsconfig.StorageClass
 
-	credentials := make(map[string]interface{})
-	credentials["status"] = filesystem.Gcsconfig.Credentials.Status
-	credentials["payload"] = filesystem.Gcsconfig.Credentials.Payload
-	credentials["key"] = filesystem.Gcsconfig.Credentials.Key
-	credentials["additional_data"] = filesystem.Gcsconfig.Credentials.AdditionalData
-	credentials["mode"] = filesystem.Gcsconfig.Credentials.Mode
+	// Ugly fix to handle empty struct response.
+	if filesystem.Gcsconfig.Credentials.Key != "" ||
+		filesystem.Gcsconfig.Credentials.Status != "" ||
+		filesystem.Gcsconfig.Credentials.Payload != "" ||
+		filesystem.Gcsconfig.Credentials.AdditionalData != "" {
 
-	gcsconfig["credentials"] = []interface{}{credentials}
+		credentials := make(map[string]interface{})
+		credentials["status"] = filesystem.Gcsconfig.Credentials.Status
+		credentials["payload"] = filesystem.Gcsconfig.Credentials.Payload
+		credentials["key"] = filesystem.Gcsconfig.Credentials.Key
+		credentials["additional_data"] = filesystem.Gcsconfig.Credentials.AdditionalData
+		credentials["mode"] = filesystem.Gcsconfig.Credentials.Mode
+
+		gcsconfig["credentials"] = []interface{}{credentials}
+	}
 
 	result["gcsconfig"] = []interface{}{gcsconfig}
 
