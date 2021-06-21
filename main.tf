@@ -30,7 +30,7 @@ resource "hashicups_admin" "test" {
 }*/
 
 resource "hashicups_user" "test" {
-  username = "terraform211"
+  username = "terraform213"
   home_dir = "/mp"
   permissions {
     global = [ "*" ]
