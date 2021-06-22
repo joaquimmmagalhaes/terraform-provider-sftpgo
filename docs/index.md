@@ -24,6 +24,6 @@ provider "sftpgo" {
 
 ### Optional
 
-- **username** (String, Optional) Username to authenticate to HashiCups API
-- **password** (String, Optional) Password to authenticate to HashiCups API
-- **host** (String, Optional) HashiCups API address (defaults to `localhost:19090`)
+- **username** (String, Optional) Username to authenticate to SFTPGo API
+- **password** (String, Optional) Password to authenticate to SFTPGo API
+- **host** (String, Optional) SFTPGo API address
