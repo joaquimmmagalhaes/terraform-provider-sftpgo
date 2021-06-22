@@ -1,0 +1,2 @@
+# [SFTPGo](https://github.com/drakkan/sftpgo) Terraform Provider
+[![release](https://github.com/joaquimmmagalhaes/terraform-provider-sftpgo/actions/workflows/release.yml/badge.svg)](https://github.com/joaquimmmagalhaes/terraform-provider-sftpgo/actions/workflows/release.yml)

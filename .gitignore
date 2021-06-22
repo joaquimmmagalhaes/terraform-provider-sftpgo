@@ -1,0 +1,6 @@
+.idea/
+vendor/
+terraform-provider-sftpgo
+.terraform/
+.terraform.lock.hcl
+dist/
