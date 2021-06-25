@@ -60,7 +60,7 @@ func Get() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"global": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
