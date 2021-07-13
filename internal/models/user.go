@@ -18,8 +18,8 @@ type User struct {
 	VirtualFolders    []VirtualFolder     `json:"virtual_folders"`
 	UploadBandwidth   int                 `json:"upload_bandwidth"`
 	DownloadBandwidth int                 `json:"download_bandwidth"`
-	Filters           Filters             `json:"filters"`
-	Filesystem        Filesystem          `json:"filesystem"`
+	Filters           *Filters            `json:"filters,omitempty"`
+	Filesystem        *Filesystem         `json:"filesystem,omitempty"`
 	AdditionalInfo    string              `json:"additional_info"`
 }
 
@@ -37,8 +37,8 @@ type VirtualFolder struct {
 	// Just for mapping. Not used
 	UsedQuotaFiles int `json:"used_quota_files"`
 	// Just for mapping. Not used
-	LastQuotaUpdate int        `json:"last_quota_update"`
-	Filesystem      Filesystem `json:"filesystem"`
+	LastQuotaUpdate int         `json:"last_quota_update"`
+	Filesystem      *Filesystem `json:"filesystem,omitempty"`
 }
 
 type Filesystem struct {

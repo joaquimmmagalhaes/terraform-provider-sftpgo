@@ -39,6 +39,7 @@ func NewClient(ctx context.Context, host, username, password *string) (Client, e
 	ar := AuthResponse{}
 	err = json.Unmarshal(body, &ar)
 	if err != nil {
+		panic(string(body))
 		return nil, err
 	}
 

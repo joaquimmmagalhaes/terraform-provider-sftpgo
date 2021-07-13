@@ -1,6 +1,6 @@
 module github.com/joaquimmmagalhaes/terraform-provider-sftpgo
 
-go 1.15
+go 1.16
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2 // indirect
