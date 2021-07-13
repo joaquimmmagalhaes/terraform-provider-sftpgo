@@ -4,3 +4,9 @@ terraform-provider-sftpgo
 .terraform/
 .terraform.lock.hcl
 dist/
+
+# Local debug files
+crash.log
+terraform.tfstate
+terraform.tfstate.backup
+main.tf

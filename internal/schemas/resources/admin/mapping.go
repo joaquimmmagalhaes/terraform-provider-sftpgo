@@ -12,7 +12,11 @@ func convertFromMapToAdminStruct(d *schema.ResourceData) models.Admin {
 	admin.Status = d.Get("status").(int)
 	admin.Username = d.Get("username").(string)
 	admin.Description = d.Get("description").(string)
-	admin.Password = d.Get("password").(string)
+
+	if d.HasChanges("password") {
+		admin.Password = d.Get("password").(string)
+	}
+
 	admin.Email = d.Get("email").(string)
 	admin.AdditionalInfo = d.Get("additional_info").(string)
 

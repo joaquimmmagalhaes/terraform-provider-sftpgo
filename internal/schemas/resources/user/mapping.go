@@ -14,6 +14,10 @@ func convertToStruct(d *schema.ResourceData) models.User {
 	user.Description = d.Get("description").(string)
 	user.ExpirationDate = d.Get("expiration_date").(float64)
 
+	if d.HasChanges("password") {
+		user.Password = d.Get("password").(string)
+	}
+
 	publicKeys := helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
 	if len(publicKeys) > 0 {
 		user.PublicKeys = publicKeys
@@ -116,7 +120,7 @@ func flattenPermissions(data interface{}) map[string][]string {
 	return result
 }
 
-func flattenFilters(data interface{}) models.Filters {
+func flattenFilters(data interface{}) *models.Filters {
 	var result models.Filters
 	items := data.([]interface{})
 
@@ -157,10 +161,10 @@ func flattenFilters(data interface{}) models.Filters {
 		}
 	}
 
-	return result
+	return &result
 }
 
-func flattenFileSystem(data interface{}) models.Filesystem {
+func flattenFileSystem(data interface{}) *models.Filesystem {
 	var result models.Filesystem
 	items := data.([]interface{})
 
@@ -230,5 +234,5 @@ func flattenFileSystem(data interface{}) models.Filesystem {
 		}
 	}
 
-	return result
+	return &result
 }

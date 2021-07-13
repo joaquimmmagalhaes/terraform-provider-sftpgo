@@ -5,7 +5,7 @@ type Admin struct {
 	Status         int          `json:"status"`
 	Username       string       `json:"username"`
 	Description    string       `json:"description"`
-	Password       string       `json:"password"`
+	Password       string       `json:"password,omitempty"`
 	Email          string       `json:"email"`
 	Permissions    []string     `json:"permissions"`
 	Filters        AdminFilters `json:"filters"`
