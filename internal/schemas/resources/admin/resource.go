@@ -105,8 +105,11 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("filters", flattenFilters(admin.Filters)); err != nil {
-		return diag.FromErr(err)
+	// Double validation
+	if len(admin.Filters.AllowList) > 0 {
+		if err := d.Set("filters", flattenFilters(admin.Filters)); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if err := d.Set("additional_info", admin.AdditionalInfo); err != nil {
@@ -118,7 +121,10 @@ func get(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagno
 
 func flattenFilters(filters models.AdminFilters) []interface{} {
 	transformed := make(map[string]interface{})
-	transformed["allow_list"] = filters.AllowList
+
+	if len(filters.AllowList) > 0 {
+		transformed["allow_list"] = filters.AllowList
+	}
 
 	return []interface{}{transformed}
 }

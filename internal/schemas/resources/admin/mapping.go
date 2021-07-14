@@ -26,6 +26,7 @@ func convertFromMapToAdminStruct(d *schema.ResourceData) models.Admin {
 		admin.Permissions[i] = permission.(string)
 	}
 
+	admin.Filters = models.AdminFilters{}
 	filters := d.Get("filters").([]interface{})
 	if len(filters) > 0 {
 		filters := filters[0].(map[string]interface{})
