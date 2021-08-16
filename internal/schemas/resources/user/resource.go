@@ -54,12 +54,12 @@ func Get() *schema.Resource {
 				Required: true,
 			},
 			"permissions": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"global": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -67,9 +67,9 @@ func Get() *schema.Resource {
 						},
 						"sub_dirs": {
 							Optional: true,
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Elem: &schema.Schema{
-								Type: schema.TypeList,
+								Type: schema.TypeSet,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"folder": {
@@ -77,7 +77,7 @@ func Get() *schema.Resource {
 											Required: true,
 										},
 										"permission": {
-											Type:     schema.TypeList,
+											Type:     schema.TypeSet,
 											Optional: true,
 											Elem: &schema.Schema{
 												Type: schema.TypeString,

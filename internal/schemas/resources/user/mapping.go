@@ -90,27 +90,26 @@ func flattenVirtualFolders(data interface{}) []models.VirtualFolder {
 }
 
 func flattenPermissions(data interface{}) map[string][]string {
-	permissions := data.([]interface{})
+	permissions := data.(*schema.Set).List()
 	result := make(map[string][]string)
 
 	if len(permissions) > 0 {
 		permissions := permissions[0].(map[string]interface{})
 
 		if v, ok := permissions["global"]; ok {
-			result["/"] = helpers.ConvertFromInterfaceSliceToStringSlice(v.([]interface{}))
+			result["/"] = helpers.ConvertFromInterfaceSliceToStringSlice(v.(*schema.Set).List())
 		}
 
 		if subDirs, ok := permissions["sub_dirs"]; ok {
-			subDirs := subDirs.([]interface{})
+			subDirs := subDirs.(*schema.Set).List()
 
 			if len(subDirs) > 0 {
-				subDirs := subDirs[0].([]interface{})
+				subDirs := subDirs[0].(*schema.Set).List()
 
 				if len(subDirs) > 0 {
-
 					for _, v := range subDirs {
 						subDir := v.(map[string]interface{})
-						result[subDir["folder"].(string)] = helpers.ConvertFromInterfaceSliceToStringSlice(subDir["permission"].([]interface{}))
+						result[subDir["folder"].(string)] = helpers.ConvertFromInterfaceSliceToStringSlice(subDir["permission"].(*schema.Set).List())
 					}
 				}
 			}
