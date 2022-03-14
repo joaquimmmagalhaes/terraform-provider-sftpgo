@@ -7,7 +7,6 @@ import (
 	"github.com/joaquimmmagalhaes/terraform-provider-sftpgo/internal/api"
 	"github.com/joaquimmmagalhaes/terraform-provider-sftpgo/internal/helpers"
 	"github.com/joaquimmmagalhaes/terraform-provider-sftpgo/internal/models"
-	"sort"
 	"strconv"
 )
 
@@ -135,17 +134,14 @@ func getVirtualFolders(virtualFolders []models.VirtualFolder) []interface{} {
 	return result
 }
 
-// TODO Improve and add sort by folder to prevent changes due to sort change.
 func getPermissions(permissions map[string][]string) []interface{} {
 	result := make(map[string][]interface{}, len(permissions))
 	var subDirs []map[string]interface{}
 
 	for k, v := range permissions {
 		if k == "/" {
-			sort.Strings(v)
 			result["global"] = helpers.ConvertStringSliceToInterfaceSlice(v)
 		} else {
-			sort.Strings(v)
 			subDirs = append(subDirs, map[string]interface{}{
 				"folder":     k,
 				"permission": helpers.ConvertStringSliceToInterfaceSlice(v),
@@ -154,10 +150,6 @@ func getPermissions(permissions map[string][]string) []interface{} {
 	}
 
 	if len(subDirs) > 0 {
-		sort.Slice(subDirs, func(i, j int) bool {
-			return subDirs[i]["folder"].(string) < subDirs[j]["folder"].(string)
-		})
-
 		result["sub_dirs"] = []interface{}{subDirs}
 	}
 
