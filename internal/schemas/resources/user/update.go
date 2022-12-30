@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/joaquimmmagalhaes/terraform-provider-sftpgo/internal/api"
@@ -17,6 +18,7 @@ func update(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Dia
 		d.HasChanges("description") ||
 		d.HasChanges("expiration_date") ||
 		d.HasChanges("password") ||
+		d.HasChanges("email") ||
 		d.HasChanges("public_keys") ||
 		d.HasChanges("home_dir") ||
 		d.HasChanges("permissions") ||

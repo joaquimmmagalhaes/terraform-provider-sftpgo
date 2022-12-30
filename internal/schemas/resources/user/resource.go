@@ -42,6 +42,10 @@ func Get() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"email": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"public_keys": {
 				Type:     schema.TypeList,
 				Optional: true,
