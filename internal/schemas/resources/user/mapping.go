@@ -12,11 +12,13 @@ func convertToStruct(d *schema.ResourceData) models.User {
 	user.Status = d.Get("status").(int)
 	user.Username = d.Get("username").(string)
 	user.Description = d.Get("description").(string)
+	user.AdditionalInfo = d.Get("additional_info").(string)
 	user.ExpirationDate = d.Get("expiration_date").(float64)
 
 	if d.HasChanges("password") {
 		user.Password = d.Get("password").(string)
 	}
+	user.Email = d.Get("email").(string)
 
 	publicKeys := helpers.ConvertFromInterfaceSliceToStringSlice(d.Get("public_keys"))
 	if len(publicKeys) > 0 {
@@ -136,6 +138,10 @@ func flattenFilters(data interface{}) *models.Filters {
 
 		if v, ok := items["denied_login_methods"]; ok {
 			result.DeniedLoginMethods = helpers.ConvertFromInterfaceSliceToStringSlice(v)
+		}
+
+		if v, ok := items["denied_protocols"]; ok {
+			result.DeniedProtocols = helpers.ConvertFromInterfaceSliceToStringSlice(v)
 		}
 
 		if v, ok := items["file_patterns"]; ok {

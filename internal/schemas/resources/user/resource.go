@@ -42,6 +42,10 @@ func Get() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"email": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"public_keys": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -55,6 +59,7 @@ func Get() *schema.Resource {
 			},
 			"permissions": {
 				Type:     schema.TypeSet,
+				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -89,7 +94,6 @@ func Get() *schema.Resource {
 						},
 					},
 				},
-				Optional: true,
 			},
 			"uid": {
 				Type:     schema.TypeInt,
@@ -144,7 +148,7 @@ func Get() *schema.Resource {
 						},
 						"virtual_path": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 						"quota_size": {
 							Type:     schema.TypeInt,
